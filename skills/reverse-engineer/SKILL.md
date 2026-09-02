@@ -112,5 +112,14 @@ scripts/analyze-rn.sh app.apk out/app          # Hermes -> hermes_out/ + hbctool
                                                # JSC    -> rndecompiler_out/ + jsbeautify_out/
 ```
 Hermes → `hermes-dec` (disasm + pseudo-JS) and `hbctool` (patch; version-locked). JSC →
-`react-native-decompiler` (recover modules) + `js-beautify`. Build order:
-**Android → Flutter → RN → iOS**.
+`react-native-decompiler` (recover modules) + `js-beautify`.
+
+### iOS (stage 4)
+```bash
+scripts/analyze-ios.sh app.ipa out/app     # Info.plist, entitlements, otool, nm, class-dump, swift-demangle
+```
+Unpacks `Payload/<App>.app`; emits `plist_out/`, `codesign_out/` (entitlements), `otool_out/`,
+`nm_out/`, `swiftdemangle_out/`, `classdump_out/` (ObjC headers), `strings_out/`. **Check
+`cryptid` in `otool_out/loadcmds.txt`** — App Store IPAs are FairPlay-encrypted, so `class-dump`/
+`nm` are useless until you decrypt on a jailbroken device (`frida-ios-dump`/`bagbak`). For Swift
+or deeper work, use Ghidra/Hopper. Build order: **Android → Flutter → RN → iOS** (complete).

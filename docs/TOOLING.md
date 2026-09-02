@@ -23,7 +23,7 @@ out/
 | Android | done (stage 1) | `scripts/analyze-android.sh` |
 | Flutter | done (stage 2) | `scripts/analyze-flutter.sh` |
 | React Native | done (stage 3) | `scripts/analyze-rn.sh` |
-| iOS | stage 4 | class-dump, otool/nm, swift-demangle |
+| iOS | done (stage 4) | `scripts/analyze-ios.sh` |
 
 ---
 
@@ -101,6 +101,32 @@ Notes:
   version; `hermes-dec` is more version-tolerant.
 - **JSC** bundles are just (minified) JS — `react-native-decompiler` un-webpacks modules;
   `js-beautify` is the quick fallback.
+
+## iOS (stage 4)
+
+Unpack the `.ipa` (`Payload/<App>.app`), read `Info.plist` + entitlements, and analyze the
+Mach-O. **App Store binaries are FairPlay-encrypted** (`cryptid=1`) — `class-dump`/`nm` return
+garbage until you decrypt on a jailbroken device (`frida-ios-dump` / `bagbak`).
+
+| Tool | Install (macOS) | Role | `_out` |
+|---|---|---|---|
+| **class-dump** | `brew install class-dump` | ObjC interface headers from Mach-O | `classdump_out/` |
+| **otool** | Xcode CLT (`xcode-select --install`) | arch, linked libs, load commands, encryption check | `otool_out/` |
+| **nm** | Xcode CLT | symbol table | `nm_out/` |
+| **swift-demangle** | Xcode (`xcrun swift-demangle`) | demangle Swift symbols from `nm` | `swiftdemangle_out/` |
+| **plutil** | bundled | `Info.plist` -> JSON (URL schemes, ATS) | `plist_out/` |
+| **codesign** | Xcode CLT | entitlements + signing info | `codesign_out/` |
+
+Run:
+```bash
+scripts/install-tools.sh --stack ios --check
+scripts/analyze-ios.sh app.ipa out/app
+```
+
+Notes:
+- The script prints `cryptid=` from `LC_ENCRYPTION_INFO`; if non-zero, decrypt first.
+- **class-dump** covers ObjC only; for Swift use `swift-demangle` over `nm` output, or a
+  decompiler (Ghidra / Hopper / IDA — see cross table).
 
 ## Cross disassemblers (any stack)
 

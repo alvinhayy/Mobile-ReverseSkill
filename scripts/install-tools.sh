@@ -93,9 +93,22 @@ install_rn(){
   have npm && { npm_g react-native-decompiler react-native-decompiler; npm_g js-beautify js-beautify; } || note "npm not found — install Node for react-native-decompiler / js-beautify"
 }
 
-# --- ios: filled in later stage ---
-check_ios(){ note "ios tools — stage 4 (class-dump, otool/nm/codesign/plutil, swift-demangle, hopper)"; }
-install_ios(){ note "ios install — stage 4"; }
+# --- ios (stage 4) ---
+check_ios(){
+  have class-dump && ok class-dump || miss class-dump "brew install class-dump"
+  have otool && ok otool || miss otool "xcode-select --install (Command Line Tools)"
+  have nm && ok nm || miss nm "xcode-select --install"
+  have codesign && ok codesign || miss codesign "xcode-select --install"
+  have plutil && ok plutil || miss plutil "(bundled with macOS)"
+  { have swift-demangle || xcrun --find swift-demangle >/dev/null 2>&1; } && ok swift-demangle || miss swift-demangle "Xcode (xcrun swift-demangle)"
+}
+install_ios(){
+  need_brew
+  have otool || { note "Xcode Command Line Tools (otool/nm/codesign/swift-demangle)"; xcode-select --install 2>/dev/null || true; }
+  brew_install class-dump class-dump
+  note "swift-demangle comes with Xcode: 'xcrun swift-demangle'"
+  note "App Store IPAs are FairPlay-encrypted — decrypt on a jailbroken device (frida-ios-dump / bagbak) before class-dump/nm"
+}
 
 case "$STACK" in
   android) [ $CHECK = 1 ] && check_android || install_android;;

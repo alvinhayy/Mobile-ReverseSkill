@@ -55,17 +55,21 @@ to use anywhere:
 
 ## Tooling & multi-stack (staged)
 
-Static-analysis + decompiler toolchain, built stage by stage: **Android → Flutter → RN → iOS**
-(+ cross disassemblers). Install and audit:
+Static-analysis + decompiler toolchain covering **Android · Flutter · React Native · iOS**
+(+ cross disassemblers). Detect the framework, then run its pipeline — each tool writes to its
+own `<tool>_out/` folder (git-ignored: holds decompiled target code).
 
 ```bash
-scripts/install-tools.sh --stack android --check   # audit availability
-scripts/detect-stack.sh app.apk                    # flutter|react-native|unity|xamarin|native
-scripts/analyze-android.sh app.apk out/app         # -> out/app/<tool>_out/
+scripts/install-tools.sh --stack <android|flutter|rn|ios|cross> --check   # audit availability
+scripts/detect-stack.sh   app.apk        # flutter|react-native|unity|xamarin|cordova|native
+
+scripts/analyze-android.sh app.apk  out/app   # jadx, apktool, baksmali, dex2jar, dexdump, strings
+scripts/analyze-flutter.sh app.xapk out/app   # blutter (Dart AOT) -> blutter_out/
+scripts/analyze-rn.sh      app.apk  out/app   # Hermes (hermes-dec/hbctool) or JSC (rn-decompiler)
+scripts/analyze-ios.sh     app.ipa  out/app   # Info.plist, entitlements, otool/nm, class-dump, swift-demangle
 ```
 
-Each tool writes to its own `<tool>_out/` folder (git-ignored — holds decompiled target code).
-Full matrix + status: [`docs/TOOLING.md`](docs/TOOLING.md).
+Full matrix + per-stack notes: [`docs/TOOLING.md`](docs/TOOLING.md).
 
 ## Repository layout
 
