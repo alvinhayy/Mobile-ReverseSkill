@@ -78,9 +78,22 @@ install_flutter(){
   pip_install reflutter reflutter || true
 }
 
-# --- rn / ios: filled in later stages ---
-check_rn(){ note "react-native tools — stage 3 (hermes-dec, hbctool, react-native-decompiler, js-beautify)"; }
-install_rn(){ note "rn install — stage 3"; }
+npm_g(){ have "$1" || { note "npm i -g $2"; npm install -g "$2"; }; }
+
+# --- react-native (stage 3) ---
+check_rn(){
+  { have hbc-decompiler || have hbc-disassembler; } && ok hermes-dec || miss hermes-dec "pip install hermes-dec"
+  have hbctool && ok hbctool || miss hbctool "pip install hbctool (Hermes, version-locked)"
+  have react-native-decompiler && ok react-native-decompiler || miss react-native-decompiler "npm i -g react-native-decompiler"
+  have js-beautify && ok js-beautify || miss js-beautify "npm i -g js-beautify"
+}
+install_rn(){
+  pip_install hbc-decompiler hermes-dec || true   # provides hbc-decompiler / hbc-disassembler
+  pip_install hbctool hbctool || true
+  have npm && { npm_g react-native-decompiler react-native-decompiler; npm_g js-beautify js-beautify; } || note "npm not found — install Node for react-native-decompiler / js-beautify"
+}
+
+# --- ios: filled in later stage ---
 check_ios(){ note "ios tools — stage 4 (class-dump, otool/nm/codesign/plutil, swift-demangle, hopper)"; }
 install_ios(){ note "ios install — stage 4"; }
 

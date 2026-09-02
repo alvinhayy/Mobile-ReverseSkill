@@ -22,7 +22,7 @@ out/
 |---|---|---|
 | Android | done (stage 1) | `scripts/analyze-android.sh` |
 | Flutter | done (stage 2) | `scripts/analyze-flutter.sh` |
-| React Native | stage 3 | hermes-dec, hbctool, react-native-decompiler |
+| React Native | done (stage 3) | `scripts/analyze-rn.sh` |
 | iOS | stage 4 | class-dump, otool/nm, swift-demangle |
 
 ---
@@ -75,6 +75,32 @@ Notes:
   subsequent runs on the same version are fast.
 - blutter works on **arm64** `libapp.so`; pass the arm64 split or the `.xapk`.
 - reFlutter is the *dynamic* companion (repackage + resign + install) — run it manually.
+
+## React Native (stage 3)
+
+The app logic is a JS bundle at `assets/index.android.bundle`. Two engines:
+**Hermes** (compiled bytecode — `libhermes.so` present, magic `c6 1f bc 03`) or
+**JSC** (minified JS text).
+
+| Tool | Install (macOS) | Role | `_out` |
+|---|---|---|---|
+| **hermes-dec** | `pip install hermes-dec` | Hermes bytecode -> disasm (`hbc-disassembler`) + pseudo-JS (`hbc-decompiler`) | `hermes_out/` |
+| **hbctool** | `pip install hbctool` | Hermes disasm/asm for patching (**version-locked** to the HBC version) | `hbctool_out/` |
+| **react-native-decompiler** | `npm i -g react-native-decompiler` | JSC/plain bundle -> recovered modules | `rndecompiler_out/` |
+| **js-beautify** | `npm i -g js-beautify` | prettify a minified JSC bundle | `jsbeautify_out/` |
+
+Run:
+```bash
+scripts/install-tools.sh --stack rn --check
+scripts/analyze-rn.sh app.apk out/app     # auto-detects Hermes vs JSC and routes
+```
+
+Notes:
+- **Hermes** is now the RN default. `hbctool` is picky: its disassembler is pinned to specific
+  Hermes bytecode versions — if it errors, install the `hbctool` build matching the target's HBC
+  version; `hermes-dec` is more version-tolerant.
+- **JSC** bundles are just (minified) JS — `react-native-decompiler` un-webpacks modules;
+  `js-beautify` is the quick fallback.
 
 ## Cross disassemblers (any stack)
 

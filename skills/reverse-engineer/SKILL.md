@@ -103,4 +103,14 @@ scripts/analyze-flutter.sh app.xapk out/app    # blutter -> out/app/blutter_out/
 Read `blutter_out/asm/` (Dart pseudo-source), `objs.txt`/`pp.txt`, and use the generated
 `blutter_out/blutter_frida.js` to hook the exact snapshot. First run builds blutter's Dart VM
 for the target snapshot version (`cmake`+`ninja`). `reFlutter` is the dynamic companion
-(repackage for interception). Build order: **Android → Flutter → RN → iOS**.
+(repackage for interception).
+
+### React Native (stage 3)
+Logic is `assets/index.android.bundle`. Auto-detects **Hermes** (bytecode) vs **JSC** (JS text):
+```bash
+scripts/analyze-rn.sh app.apk out/app          # Hermes -> hermes_out/ + hbctool_out/
+                                               # JSC    -> rndecompiler_out/ + jsbeautify_out/
+```
+Hermes → `hermes-dec` (disasm + pseudo-JS) and `hbctool` (patch; version-locked). JSC →
+`react-native-decompiler` (recover modules) + `js-beautify`. Build order:
+**Android → Flutter → RN → iOS**.
