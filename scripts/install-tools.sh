@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# Mobile-ReverseSkill — tool installer (macOS). Idempotent. Written in stages.
+#
+#   ./install-tools.sh --check                 # report availability, install nothing
+#   ./install-tools.sh --stack android         # install one stack's tools
+#   ./install-tools.sh --stack all             # everything implemented so far
+#
+# Stacks (build order): android → flutter → rn → ios  (+ cross disassemblers)
+set -uo pipefail
+
+STACK="all"; CHECK=0
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --stack) STACK="${2:-all}"; shift 2;;
+    --check) CHECK=1; shift;;
+    -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
+    *) echo "unknown arg: $1" >&2; exit 2;;
+  esac
+done
+
+have(){ command -v "$1" >/dev/null 2>&1; }
+ok(){   printf '  \033[32m✓\033[0m %-22s %s\n' "$1" "${2:-}"; }
+miss(){ printf '  \033[31m✗\033[0m %-22s %s\n' "$1" "${2:-not found}"; }
+note(){ printf '\033[36m[*]\033[0m %s\n' "$*"; }
+
+need_brew(){ have brew || { echo "Homebrew required: https://brew.sh"; exit 1; }; }
+brew_install(){ have "$1" || { note "brew install $2"; brew install "$2"; }; }
+brew_cask(){ note "brew install --cask $2 (skip if present)"; brew install --cask "$2" 2>/dev/null || true; }
+pip_install(){ have "$1" || { note "pip install $2"; python3 -m pip install --user "$2"; }; }
+
+dexdump_path(){ ls "$HOME"/Library/Android/sdk/build-tools/*/dexdump 2>/dev/null | tail -1; }
+
+check_android(){
+  have jadx        && ok jadx      "$(jadx --version 2>/dev/null | head -1)" || miss jadx    "brew install jadx"
+  have apktool     && ok apktool   "$(apktool --version 2>/dev/null)"        || miss apktool "brew install apktool"
+  have baksmali    && ok baksmali                                            || miss baksmali "brew install smali"
+  have d2j-dex2jar && ok dex2jar                                             || miss dex2jar  "brew install dex2jar"
+  [ -n "$(dexdump_path)" ] && ok dexdump "$(dexdump_path)"                   || miss dexdump  "Android build-tools"
+  have apkleaks    && ok apkleaks  "(optional)"                              || miss apkleaks "pip install apkleaks (optional)"
+}
+install_android(){
+  need_brew
+  brew_install jadx jadx
+  brew_install apktool apktool
+  brew_install baksmali smali          # provides baksmali + smali
+  brew_install d2j-dex2jar dex2jar
+  [ -n "$(dexdump_path)" ] || note "dexdump: install Android build-tools via sdkmanager 'build-tools;<ver>'"
+  pip_install apkleaks apkleaks || true
+}
+
+check_cross(){
+  { have ghidraRun || [ -d "/Applications/ghidra"* ] 2>/dev/null; } && ok ghidra || miss ghidra "brew install --cask ghidra"
+  have r2    && ok radare2 "$(r2 -v 2>/dev/null | head -1)" || miss radare2 "brew install radare2"
+  have rizin && ok rizin || miss rizin "brew install rizin (optional)"
+}
+install_cross(){ need_brew; brew_cask ghidra ghidra; brew_install r2 radare2; }
+
+# --- flutter / rn / ios: filled in later stages ---
+check_flutter(){ note "flutter tools — stage 2 (blutter, reflutter)"; }
+install_flutter(){ note "flutter install — stage 2"; }
+check_rn(){ note "react-native tools — stage 3 (hermes-dec, hbctool, react-native-decompiler, js-beautify)"; }
+install_rn(){ note "rn install — stage 3"; }
+check_ios(){ note "ios tools — stage 4 (class-dump, otool/nm/codesign/plutil, swift-demangle, hopper)"; }
+install_ios(){ note "ios install — stage 4"; }
+
+case "$STACK" in
+  android) [ $CHECK = 1 ] && check_android || install_android;;
+  flutter) [ $CHECK = 1 ] && check_flutter || install_flutter;;
+  rn)      [ $CHECK = 1 ] && check_rn      || install_rn;;
+  ios)     [ $CHECK = 1 ] && check_ios     || install_ios;;
+  cross)   [ $CHECK = 1 ] && check_cross   || install_cross;;
+  all)
+    if [ $CHECK = 1 ]; then
+      echo "== Android =="; check_android
+      echo "== Cross ==";   check_cross
+      echo "== Flutter =="; check_flutter
+      echo "== RN ==";      check_rn
+      echo "== iOS ==";     check_ios
+    else
+      install_android; install_cross; install_flutter; install_rn; install_ios
+    fi;;
+  *) echo "unknown stack: $STACK (android|flutter|rn|ios|cross|all)"; exit 2;;
+esac

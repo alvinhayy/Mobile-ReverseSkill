@@ -53,9 +53,25 @@ to use anywhere:
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
 
+## Tooling & multi-stack (staged)
+
+Static-analysis + decompiler toolchain, built stage by stage: **Android → Flutter → RN → iOS**
+(+ cross disassemblers). Install and audit:
+
+```bash
+scripts/install-tools.sh --stack android --check   # audit availability
+scripts/detect-stack.sh app.apk                    # flutter|react-native|unity|xamarin|native
+scripts/analyze-android.sh app.apk out/app         # -> out/app/<tool>_out/
+```
+
+Each tool writes to its own `<tool>_out/` folder (git-ignored — holds decompiled target code).
+Full matrix + status: [`docs/TOOLING.md`](docs/TOOLING.md).
+
 ## Repository layout
 
 ```
+.claude/commands/       slash commands
+scripts/                 install-tools.sh, detect-stack.sh, analyze-android.sh
 .claude/commands/       slash commands (see below)
 skills/
   afl-fuzzing/         SKILL.md + harness/ + scripts/ + README.md (full method writeup)

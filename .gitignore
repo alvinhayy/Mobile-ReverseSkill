@@ -13,3 +13,11 @@ findings/
 # os / editor
 .DS_Store
 *.swp
+
+# analysis outputs — contain decompiled TARGET code, never commit
+*_out/
+out/
+analysis/
+*.dex
+*.jar
+detect.txt

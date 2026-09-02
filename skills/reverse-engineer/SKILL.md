@@ -69,3 +69,28 @@ redact to placeholders before publishing.
 
 Methodology adapted from the community "reverse-engineer" skill
 (gist `binsarjr/adbd5110cd78bbd09a1d9afc0f23c944`). Original wording MIT.
+
+## Toolchain & multi-stack pipelines
+
+Install per stack (macOS): `scripts/install-tools.sh --stack <android|flutter|rn|ios|cross>`
+(`--check` audits without installing). Full matrix: [`docs/TOOLING.md`](../../docs/TOOLING.md).
+
+**Detect the framework first** — it routes which decompilers apply:
+```bash
+scripts/detect-stack.sh app.apk        # flutter | react-native | unity | xamarin | cordova | native
+```
+
+### Output convention — `<tool>_out/`
+Every tool that emits output writes to a folder named after it, suffix `_out`
+(`jadx_out/`, `apktool_out/`, `dex2jar_out/`, `baksmali_out/`, `dexdump_out/`,
+`strings_out/`, `apkleaks_out/`). These hold **decompiled target code** — keep `*_out/` in
+`.gitignore`; never commit them.
+
+### Android (stage 1)
+```bash
+scripts/analyze-android.sh app.apk out/app     # jadx, apktool, baksmali, dex2jar, dexdump,
+                                               # strings, apkleaks -> out/app/<tool>_out/
+```
+Read `jadx_out/` (Java), `apktool_out/AndroidManifest.xml`, `strings_out/urls.txt`,
+`apkleaks_out/`. Thin dex + `libapp.so` ⇒ Flutter → Flutter pipeline (stage 2).
+Build order: **Android → Flutter → RN → iOS**.
