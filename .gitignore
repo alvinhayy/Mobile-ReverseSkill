@@ -1,0 +1,15 @@
+# build artifacts
+skills/afl-fuzzing/build/
+skills/afl-fuzzing/out/
+**/AFLplusplus/
+*.o
+*.so
+*.apk
+*.xapk
+*.aab
+# never commit target data / findings
+findings/
+**/*_findings/
+# os / editor
+.DS_Store
+*.swp
