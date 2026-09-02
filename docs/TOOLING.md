@@ -21,7 +21,7 @@ out/
 | Stack | Status | Pipeline |
 |---|---|---|
 | Android | done (stage 1) | `scripts/analyze-android.sh` |
-| Flutter | stage 2 | blutter, reFlutter |
+| Flutter | done (stage 2) | `scripts/analyze-flutter.sh` |
 | React Native | stage 3 | hermes-dec, hbctool, react-native-decompiler |
 | iOS | stage 4 | class-dump, otool/nm, swift-demangle |
 
@@ -49,6 +49,32 @@ Notes:
 - Flutter apps keep logic in `libapp.so` (Dart AOT); most classes are absent from
   `classes.dex` -- jadx/smali output is thin, routing to the Flutter pipeline (stage 2).
 - `dexdump` ships with Android build-tools: `sdkmanager 'build-tools;<ver>'`.
+
+## Flutter (stage 2)
+
+Flutter logic is a **Dart AOT snapshot** in `libapp.so` (paired with `libflutter.so`),
+usually in the **arm64 split** / `.xapk`, not the base APK.
+
+| Tool | Install (macOS) | Role | `_out` |
+|---|---|---|---|
+| **blutter** | `git clone worawit/blutter` + `brew install cmake ninja` | Dart AOT snapshot -> pseudo-source, class defs, `blutter_frida.js` | `blutter_out/` |
+| **reFlutter** | `pip install reflutter` | patch/repack APK for traffic interception + snapshot dump (dynamic) | `reflutter_out/` (manual) |
+| `unzip` | bundled | pull `assets/flutter_assets/` (pubspec, fonts) | `assets_out/` |
+
+Run:
+```bash
+scripts/install-tools.sh --stack flutter --check     # audit (blutter, reflutter, cmake, ninja)
+export BLUTTER_HOME="$HOME/tools/blutter"            # where blutter.py lives
+scripts/analyze-flutter.sh app.xapk out/app          # -> out/app/blutter_out/, assets_out/
+```
+
+Notes:
+- `blutter_out/` contains `asm/` (per-library Dart pseudo-source), `objs.txt`, `pp.txt`, and
+  `blutter_frida.js` (a ready hook script for the exact snapshot).
+- **First run builds blutter's Dart VM** for the target's snapshot version (needs `cmake`+`ninja`);
+  subsequent runs on the same version are fast.
+- blutter works on **arm64** `libapp.so`; pass the arm64 split or the `.xapk`.
+- reFlutter is the *dynamic* companion (repackage + resign + install) — run it manually.
 
 ## Cross disassemblers (any stack)
 

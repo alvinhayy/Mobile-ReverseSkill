@@ -93,4 +93,14 @@ scripts/analyze-android.sh app.apk out/app     # jadx, apktool, baksmali, dex2ja
 ```
 Read `jadx_out/` (Java), `apktool_out/AndroidManifest.xml`, `strings_out/urls.txt`,
 `apkleaks_out/`. Thin dex + `libapp.so` ⇒ Flutter → Flutter pipeline (stage 2).
-Build order: **Android → Flutter → RN → iOS**.
+
+### Flutter (stage 2)
+Dart AOT logic lives in `libapp.so` (+ `libflutter.so`), usually in the **arm64 split / .xapk**.
+```bash
+export BLUTTER_HOME="$HOME/tools/blutter"
+scripts/analyze-flutter.sh app.xapk out/app    # blutter -> out/app/blutter_out/ ; assets_out/
+```
+Read `blutter_out/asm/` (Dart pseudo-source), `objs.txt`/`pp.txt`, and use the generated
+`blutter_out/blutter_frida.js` to hook the exact snapshot. First run builds blutter's Dart VM
+for the target snapshot version (`cmake`+`ninja`). `reFlutter` is the dynamic companion
+(repackage for interception). Build order: **Android → Flutter → RN → iOS**.

@@ -55,9 +55,30 @@ check_cross(){
 }
 install_cross(){ need_brew; brew_cask ghidra ghidra; brew_install r2 radare2; }
 
-# --- flutter / rn / ios: filled in later stages ---
-check_flutter(){ note "flutter tools — stage 2 (blutter, reflutter)"; }
-install_flutter(){ note "flutter install — stage 2"; }
+# --- flutter (stage 2) ---
+BLUTTER_DIR="${BLUTTER_HOME:-$HOME/tools/blutter}"
+check_flutter(){
+  { [ -f "$BLUTTER_DIR/blutter.py" ] || [ -f "$HOME/blutter/blutter.py" ]; } && ok blutter "$BLUTTER_DIR" || miss blutter "install_flutter (git clone worawit/blutter)"
+  have reflutter && ok reflutter || miss reflutter "pip install reflutter"
+  have cmake && ok cmake || miss cmake "brew install cmake (blutter build)"
+  have ninja && ok ninja || miss ninja "brew install ninja (blutter build)"
+}
+install_flutter(){
+  need_brew
+  brew_install cmake cmake
+  brew_install ninja ninja
+  have python3 || brew_install python3 python
+  if [ ! -f "$BLUTTER_DIR/blutter.py" ]; then
+    note "git clone worawit/blutter -> $BLUTTER_DIR"
+    mkdir -p "$(dirname "$BLUTTER_DIR")"
+    git clone --depth 1 https://github.com/worawit/blutter "$BLUTTER_DIR"
+  fi
+  note "blutter builds its Dart VM on first run against the target's snapshot version"
+  note "export BLUTTER_HOME=$BLUTTER_DIR   # so analyze-flutter.sh finds it"
+  pip_install reflutter reflutter || true
+}
+
+# --- rn / ios: filled in later stages ---
 check_rn(){ note "react-native tools — stage 3 (hermes-dec, hbctool, react-native-decompiler, js-beautify)"; }
 install_rn(){ note "rn install — stage 3"; }
 check_ios(){ note "ios tools — stage 4 (class-dump, otool/nm/codesign/plutil, swift-demangle, hopper)"; }
