@@ -49,6 +49,7 @@ runtime/               Frida helper scripts (TLS unpinning, emulator/RASP/attest
                        device spoofing) — generalized templates; set your own target package
 docs/
   WORKFLOW.md          end-to-end mobile-RE workflow guide (toolchain, rooting, fuzzing)
+  MCP-SETUP.md         runtime device-automation MCP setup (uiautomator2-mcp)
 ```
 
 ## Frida runtime helpers (`runtime/`)
@@ -63,6 +64,21 @@ frida -U -f com.example.targetapp -l runtime/flutter-tls.js
 Highlights: `flutter-tls*.js` (Flutter/BoringSSL TLS unpinning), `emu-bypass.js`
 (emulator-detection bypass), `approov-*.js` (attestation/pinning probes),
 `rasp-*.js` (RASP neutralisation patterns), `*-spoof.js` (device identity spoofing).
+
+## Runtime device automation (MCP)
+
+Dynamic analysis drives the app on a device — launch it, dump the UI tree, tap through flows,
+and reach the screen that triggers the code under test (open the QR scanner, walk an auth flow
+while a Frida script is attached). This uses **[uiautomator2-mcp](https://github.com/fdciabdul/uiautomator2-mcp)**
+by [@fdciabdul](https://github.com/fdciabdul):
+
+```bash
+git clone https://github.com/fdciabdul/uiautomator2-mcp.git
+cd uiautomator2-mcp && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+claude mcp add --transport stdio uiautomator2 -- $PWD/.venv/bin/python $PWD/server.py
+```
+
+Full setup + config for other MCP clients: [`docs/MCP-SETUP.md`](docs/MCP-SETUP.md).
 
 ## Rooting a test AVD
 

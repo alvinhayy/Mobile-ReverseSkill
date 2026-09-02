@@ -25,3 +25,9 @@ frida -U -f com.example.targetapp -l rasp-bypass.js -l flutter-tls.js
 
 **Authorized use only.** Do not point these at apps or infrastructure you don't own or aren't
 contracted to test.
+
+## Driving the app (MCP)
+
+Pair these Frida scripts with **[uiautomator2-mcp](https://github.com/fdciabdul/uiautomator2-mcp)**
+so the agent can launch the app, dump the UI, and tap through to the screen you want to observe.
+Setup: [`../docs/MCP-SETUP.md`](../docs/MCP-SETUP.md).
