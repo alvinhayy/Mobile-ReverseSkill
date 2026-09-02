@@ -39,9 +39,24 @@ Or clone and point your agent's skills directory at `skills/`:
 git clone https://github.com/alvinhayy/Mobile-ReverseSkill
 ```
 
+## Slash commands
+
+Ship with the repo as a project (`.claude/commands/`), or copy them to `~/.claude/commands/`
+to use anywhere:
+
+| Command | Does |
+|---|---|
+| `/re-static <apk\|ipa\|bundle>` | Static analysis via the `reverse-engineer` skill (endpoints, secrets, deception) |
+| `/fuzz-build [lib.so]` | Build AFL++ for Android + harness, push to the emulator |
+| `/fuzz-validate [lib.so]` | Prove the harness reaches the target (poison-pointer / under-alloc controls) |
+| `/fuzz-run [seconds]` | Run the on-device campaign and triage crashes |
+| `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
+| `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
+
 ## Repository layout
 
 ```
+.claude/commands/       slash commands (see below)
 skills/
   afl-fuzzing/         SKILL.md + harness/ + scripts/ + README.md (full method writeup)
   reverse-engineer/    SKILL.md
