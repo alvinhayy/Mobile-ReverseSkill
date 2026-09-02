@@ -6,8 +6,12 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/alvinhayy/Mobile-ReverseSkill/stargazers"><img src="https://img.shields.io/github/stars/alvinhayy/Mobile-ReverseSkill?style=flat&logo=github"></a>
   <img src="https://img.shields.io/badge/skills-2-blue">
   <img src="https://img.shields.io/badge/platform-Android%20%7C%20iOS%20%7C%20Web-green">
+  <img src="https://img.shields.io/badge/install-skillfish-8A2BE2?logo=npm">
+  <img src="https://img.shields.io/github/last-commit/alvinhayy/Mobile-ReverseSkill">
+  <img src="https://img.shields.io/github/languages/code-size/alvinhayy/Mobile-ReverseSkill">
   <img src="https://img.shields.io/badge/license-MIT-lightgrey">
 </p>
 
