@@ -5,12 +5,23 @@
     "skills/reverse-engineer/SKILL.md",
     "skills/afl-fuzzing/SKILL.md",
     "docs/TOOLING.md",
-    "docs/bypass-reference.md"
+    "docs/WORKFLOW.md",
+    "docs/bypass-reference.md",
+    "docs/frida-objection.md",
+    "docs/react-native.md",
+    "docs/flutter.md",
+    "docs/ios-reversing.md",
+    "docs/ios-nojailbreak.md",
+    "docs/attack-surface.md",
+    "docs/commercial-protectors.md"
   ],
   "mcp": {
     "uiautomator2": {
       "type": "local",
-      "command": ["python3", "~/tools/uiautomator2-mcp/server.py"],
+      "command": [
+        "python3",
+        "~/tools/uiautomator2-mcp/server.py"
+      ],
       "enabled": false
     }
   }

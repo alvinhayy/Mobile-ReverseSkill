@@ -53,6 +53,8 @@ to use anywhere:
 | `/fuzz-source <url\|path> <entry-fn>` | Coverage-guided fuzz an **open-source** C/C++ lib on the host (AFL++/libFuzzer, source-instrumented) |
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/observe-runtime <package> [re-out]` | Autonomous runtime observation — reads static protections+flow, attaches the right bypasses, drives the app via `uiautomator2-mcp`, correlates behavior |
+| `/merge-apks <dir|xapk|apks|apkm>` | Merge a split app into one installable signed APK (APKEditor) |
+| `/patch-apk <apk>` | Static patch/rebuild/re-sign (decompile→smali→apktool b→apksigner), or `depin` via apk-mitm |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
 | `/spawn [avd-name]` | Boot a rooted KernelSU AVD — auto-picks the only one, else `/spawn <name>` |
 | `/setup [burp\|httptoolkit\|all]` | Prep dynamic analysis — proxy CA in the trust store + `frida-server` + `uiautomator2-mcp` |
