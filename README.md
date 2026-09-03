@@ -53,7 +53,7 @@ to use anywhere:
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
 | `/spawn [avd-name]` | Boot a rooted KernelSU AVD — auto-picks the only one, else `/spawn <name>` |
-| `/setup [burp\|httptoolkit\|all]` | Prep dynamic analysis — install the proxy CA in the trust store + start `frida-server` |
+| `/setup [burp\|httptoolkit\|all]` | Prep dynamic analysis — proxy CA in the trust store + `frida-server` + `uiautomator2-mcp` |
 
 ### Interactive / long-running steps open in a new tab
 
