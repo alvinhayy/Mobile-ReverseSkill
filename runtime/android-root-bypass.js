@@ -1,21 +1,39 @@
-/* android-root-bypass.js — RootBeer + Build.TAGS + package-hide + isDebuggerConnected.
- * frida -U -f <pkg> -l runtime/android-root-bypass.js   (authorized targets only) */
+/* android-root-bypass.js — neutralise RootBeer + Build.TAGS + package-hide + isDebuggerConnected.
+ * frida -U -f <pkg> -l runtime/android-root-bypass.js   (authorized targets only)
+ * Hooks every RootBeer boolean check -> false, retrying until the class is loaded (it is often
+ * loaded after spawn), so it works even when attached at process start. */
 Java.perform(function () {
-  // RootBeer — force every check to false
-  try {
-    var RootBeer = Java.use("com.scottyab.rootbeer.RootBeer");
-    ["isRooted","isRootedWithBusyBox","checkSuExists","detectRootManagementApps",
-     "detectPotentiallyDangerousApps","detectTestKeys","checkForDangerousProps",
-     "checkForRWPaths"].forEach(function (m) {
-      if (RootBeer[m]) RootBeer[m].implementation = function () { return false; };
+  var METHODS = [
+    "isRooted","isRootedWithBusyBox","isRootedWithEmulatorCheck",
+    "detectRootManagementApps","detectPotentiallyDangerousApps","detectRootCloakingApps",
+    "detectTestKeys","checkForBusyBoxBinary","checkForSuBinary","checkSuExists",
+    "checkForRWPaths","checkForDangerousProps","checkForRootNative","checkForMagiskBinary",
+    "checkForBinary","isSelinuxFlagInEnabled"
+  ];
+  function hookRootBeer() {
+    var RB;
+    try { RB = Java.use("com.scottyab.rootbeer.RootBeer"); } catch (e) { return false; }
+    var n = 0;
+    METHODS.forEach(function (m) {
+      if (!RB[m]) return;
+      try {
+        RB[m].overloads.forEach(function (ov) {
+          ov.implementation = function () { return false; };
+        });
+        n++;
+      } catch (e) {}
     });
-    console.log("[+] RootBeer neutralised");
-  } catch (e) {}
+    console.log("[+] RootBeer neutralised (" + n + " methods)");
+    return true;
+  }
+  if (!hookRootBeer()) {                       // class not loaded yet at spawn → retry
+    var tries = 0;
+    var t = setInterval(function () {
+      if (hookRootBeer() || ++tries > 100) clearInterval(t);
+    }, 200);
+  }
 
-  // Build.TAGS → release-keys
   try { Java.use("android.os.Build").TAGS.value = "release-keys"; } catch (e) {}
-
-  // hide magisk / frida / xposed from PackageManager
   try {
     var PM = Java.use("android.content.pm.PackageManager");
     var NNF = Java.use("android.content.pm.PackageManager$NameNotFoundException");
@@ -25,8 +43,6 @@ Java.perform(function () {
       return this.getPackageInfo(pkg, flags);
     };
   } catch (e) {}
-
-  // Debug.isDebuggerConnected → false
   try { Java.use("android.os.Debug").isDebuggerConnected.implementation = function () { return false; }; } catch (e) {}
   console.log("[+] android-root-bypass loaded");
 });
