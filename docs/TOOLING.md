@@ -128,6 +128,21 @@ Notes:
 - **class-dump** covers ObjC only; for Swift use `swift-demangle` over `nm` output, or a
   decompiler (Ghidra / Hopper / IDA — see cross table).
 
+## iOS lab & device tooling (non-jailbreak)
+
+| Tool | Install | Use |
+|---|---|---|
+| **libimobiledevice** | `brew install libimobiledevice` | `idevice*` — device info, syslog, pair |
+| **ideviceinstaller** | `brew install ideviceinstaller` | install/list/uninstall apps over USB |
+| **ios-deploy** | `brew install ios-deploy` | install + debug an app bundle |
+| **ipatool** | `brew install ipatool` | download IPAs from the App Store |
+| **ios-app-signer** | GUI (github.com/DanTheMan827/ios-app-signer) | re-sign IPA; **uncheck "No get-task-allow"** for Frida attach |
+| **Sideloadly / AltStore** | sideloadly.io / altstore.io | sideload re-signed IPA with a free Apple cert (AltStore auto-refreshes) |
+| **frida-ios-dump** | pip / repo | decrypt an installed App Store binary (needs a JB device once) |
+| **ioscpy** | github.com/lautarovculic/ioscpy | scrcpy-for-iOS — mirror/control a **jailbroken** iPhone (the iOS analog to the Android uiautomator2 MCP) |
+
+See [`ios-nojailbreak.md`](ios-nojailbreak.md) for the full re-sign + sideload workflow.
+
 ## Cross disassemblers (any stack)
 
 | Tool | Install | Use |
