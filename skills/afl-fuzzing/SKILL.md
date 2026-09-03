@@ -66,9 +66,18 @@ and becomes SIGSEGV — a *real* bug at valid geometry, not a harness artifact.
 - Closed-source target: `AFL_PRELOAD=/data/local/tmp/libdislocator.so` page-guards allocations.
 
 ### 5. Run the campaign
+Open AFL in its own terminal tab so the **live AFL status screen** is visible while you keep
+monitoring the structured stats (see [`run-in-tab.sh`](../../scripts/run-in-tab.sh)):
 ```bash
+# live TUI in a new tab (keep AFL_NO_UI OFF); mirrored to ~/.mre-runs/fuzz-*.log
+LOG=$(scripts/run-in-tab.sh fuzz "adb shell 'cd /data/local/tmp/bh; LD_LIBRARY_PATH=. \
+  AFL_PRELOAD=./libdislocator.so AFL_SKIP_BIN_CHECK=1 AFL_SKIP_CPUFREQ=1 \
+  AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=1 timeout 3600 \
+  ./afl-fuzz -n -m none -t 1500 -i seeds -o out -- ./harness @@'")
+# monitor from anywhere (clean stats, not the ANSI TUI):
+adb shell 'tail -1 /data/local/tmp/bh/out/plot_data'   # total_execs, saved_crashes, ...
+# headless alternative:
 adb shell 'nohup sh /data/local/tmp/run_target.sh 3600 >/data/local/tmp/nohup.log 2>&1 &'
-adb shell 'tail -1 /data/local/tmp/out/plot_data'   # total_execs, saved_crashes
 ```
 
 ## ⚠ Validate the harness — the most important step
