@@ -24,7 +24,8 @@ Steps:
    `LOG=$(scripts/run-in-tab.sh emu-<name> "<emulator> -avd <name> -no-snapshot-load")`
 6. **Wait for boot**: `adb wait-for-device` then poll `adb shell getprop sys.boot_completed`
    until `1` (and read `$LOG` for boot progress / errors).
-7. **Verify root (KernelSU)**: `adb shell su 0 id`. If not root, hint:
+7. **Verify root (KernelSU)**: `adb shell su -c id` (KernelSU uses `su -c`, not Magisk's
+   `su 0 …`). Expect `uid=0(root) … context=u:r:su:s0`. If not root, hint:
    `cd tools/Mobile-Pentest-Setup && ./root-avd.sh --grant-shell`.
 8. **Report**: device serial (`adb devices`), model (`adb shell getprop ro.product.model`),
    API level, and root status.
