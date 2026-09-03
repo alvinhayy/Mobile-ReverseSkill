@@ -52,6 +52,7 @@ to use anywhere:
 | `/fuzz-run [seconds]` | Run the on-device campaign and triage crashes |
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
+| `/spawn [avd-name]` | Boot a rooted KernelSU AVD — auto-picks the only one, else `/spawn <name>` |
 
 ## Tooling & multi-stack (staged)
 
