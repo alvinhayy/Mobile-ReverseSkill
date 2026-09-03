@@ -95,21 +95,26 @@ Full matrix + per-stack notes: [`docs/TOOLING.md`](docs/TOOLING.md).
 ## Repository layout
 
 ```
-.claude/commands/       slash commands
-scripts/                 install-tools.sh, detect-stack.sh, analyze-android.sh
-.claude/commands/       slash commands (see below)
+.claude/commands/       slash commands (also mirrored in .opencode/command/)
+AGENTS.md · opencode.json   opencode integration (agent guide + MCP + loaded docs)
+scripts/                 detect-stack, analyze-{android,flutter,rn,ios}, attack-surface,
+                         merge-apks, patch-apk, install-tools, run-in-tab, fuzz-source, rebuild
 skills/
   afl-fuzzing/         SKILL.md + harness/ + scripts/ + README.md (full method writeup)
   reverse-engineer/    SKILL.md
-runtime/               Frida helper scripts (TLS unpinning, emulator/RASP/attestation bypass,
-                       device spoofing) — generalized templates; set your own target package
+runtime/               Frida templates — SSL/pinning (ssl-pinning-universal, flutter-tls*,
+                       ios-bypass), root/JB/anti-debug (android-root-bypass, flutter-jb-root-bypass,
+                       android-antidebug, emu-bypass), recon (rn-frida-hook, crypto-dump,
+                       registernatives-dump) — set your own target package
 docs/
-  WORKFLOW.md          end-to-end mobile-RE workflow guide (toolchain, rooting, fuzzing)
-  MCP-SETUP.md         runtime device-automation MCP setup (uiautomator2-mcp)
-  TOOLING.md           per-stack static-analysis toolchain matrix
-  bypass-reference.md  root/jailbreak/anti-debug/SSL-pinning bypass reference
-  frida-objection.md   Frida + Objection deep usage (APIs, commands, gadget deployment)
-  ios-reversing.md     iOS RE (IPA decrypt, Mach-O, ObjC/Swift, jailbreak bypass)
+  ROADMAP.md           backlog / gap-analysis status
+  WORKFLOW.md          end-to-end workflow + OWASP MASTG checklist
+  TOOLING.md           per-stack toolchain matrix (+ iOS lab tooling)
+  MCP-SETUP.md         device-automation MCP (uiautomator2) + Burp CA routes
+  bypass-reference.md · frida-objection.md   root/JB/anti-debug/SSL + Frida/Objection/RMS
+  react-native.md · flutter.md               RN & Flutter static + dynamic + TLS
+  ios-reversing.md · ios-nojailbreak.md       iOS RE + non-jailbreak pipeline
+  attack-surface.md · commercial-protectors.md   IPC/loot + Appdome-style bypass
 ```
 
 ## Frida runtime helpers (`runtime/`)
