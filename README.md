@@ -50,6 +50,7 @@ to use anywhere:
 | `/fuzz-build [lib.so]` | Build AFL++ for Android + harness, push to the emulator |
 | `/fuzz-validate [lib.so]` | Prove the harness reaches the target (poison-pointer / under-alloc controls) |
 | `/fuzz-run [seconds]` | Run the on-device campaign and triage crashes |
+| `/fuzz-source <url\|path> <entry-fn>` | Coverage-guided fuzz an **open-source** C/C++ lib on the host (AFL++/libFuzzer, source-instrumented) |
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/observe-runtime <package> [re-out]` | Autonomous runtime observation — reads static protections+flow, attaches the right bypasses, drives the app via `uiautomator2-mcp`, correlates behavior |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
