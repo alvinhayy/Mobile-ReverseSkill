@@ -141,3 +141,26 @@ Interceptor.replace(f, new NativeCallback(function (trust, result) {
 ```
 
 _Source: Frida docs, objection wiki, OWASP MASTG._
+
+## RMS — Runtime Mobile Security (Frida GUI)
+A web GUI over Frida for fast triage: dump/enumerate loaded classes, **mass-hook every method of a
+filtered class**, live API monitor, and prebuilt bypasses (`system_exit_bypass`, root/SSL).
+```bash
+pip install rms-runtime-mobile-security   # or: git clone Merabtene/RMS-Runtime-Mobile-Security
+rms   # opens http://127.0.0.1:5000 ; select the app, then Hook/monitor
+```
+Great for discovering which classes/methods to target before writing a focused Frida script.
+Codeshare quick-bypasses: `frida --codeshare dzonerzy/fridantiroot`,
+`frida --codeshare pcipolloni/universal-android-ssl-pinning-bypass-with-frida`.
+
+## Frida / Objection "version hell" (most common attach failure)
+- **frida-server on device MUST match host `frida` exactly** (major.minor.patch). Check
+  `frida --version` vs the server (or the KSU module's `module.prop`); align with
+  `pip install "frida==<server-version>"`.
+- If a KSU/Magisk **module already runs a server** (e.g. `cekidot`), use it — match the client to
+  it instead of fighting it.
+- Objection failing on new Android/ART = its bundled `frida-java-bridge` is stale →
+  `cd $(objection ...)/node_modules && npm i frida-java-bridge@latest` (see sensepost/objection#800),
+  or use plain Frida scripts.
+- `pkill -f frida` also kills the MCP/agent node process (argv contains "frida"); target the binary
+  (`pkill -x frida-server`).

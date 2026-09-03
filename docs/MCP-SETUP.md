@@ -77,3 +77,12 @@ On first use, call `connect_device` (uiautomator2 pushes its on-device agent), t
 MCP server: **[fdciabdul/uiautomator2-mcp](https://github.com/fdciabdul/uiautomator2-mcp)**
 (built on [openatx/uiautomator2](https://github.com/openatx/uiautomator2)). Not vendored here —
 install from upstream; it keeps its own license.
+
+## Burp CA on Android 14+ (alternatives to KernelSU mount-ca)
+The `/setup` flow trusts the proxy CA via `mount-ca.sh` (KernelSU, conscrypt/APEX). For
+**Magisk / rootAVD (x86_64)** users, a Magisk module is easier:
+- **BurpCA-AutoTrust** (github.com/Hrishikesh7665/BurpCA-AutoTrust) or **AlwaysTrustUserCerts /
+  conscrypt-trust-user-certs** (fox-it) — bind-mount the user CA into the system/APEX trust store
+  on every boot. Install the module, push the Burp CA to the user store, reboot.
+- Manual (root): convert Burp DER→PEM, `subject_hash_old` rename, copy to
+  `/system/etc/security/cacerts/<hash>.0` (chmod 644) via an overlay/remount.

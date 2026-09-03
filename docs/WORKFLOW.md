@@ -191,3 +191,16 @@ rootAVD). Mendukung image x86/x86_64/arm64-v8a.
 - `runtime/README.md`, `runtime/BYPASS-2026-08-02.md` — status lapisan proteksi.
 - `*-flow-analysis.md` — alur app.
 - `findings/*/SUMMARY.md`.
+
+## Appendix — OWASP MASTG methodology checklist
+Map each engagement against MASTG so nothing is skipped:
+- [ ] **Architecture & data flow** — components, endpoints, third parties (`attack-surface.sh`).
+- [ ] **Static** — decompile per stack; secrets, endpoints, deception (`analyze-*.sh`, `/re-static`).
+- [ ] **Storage (MASVS-STORAGE)** — shared_prefs, SQLite, files, AsyncStorage, Keychain/Keystore, logs, clipboard (loot checklist in `attack-surface.md`).
+- [ ] **Crypto (MASVS-CRYPTO)** — hardcoded keys, weak algos, IV reuse (`crypto-dump.js`).
+- [ ] **Auth/session (MASVS-AUTH)** — token handling, biometrics/local-auth, session fixation.
+- [ ] **Network (MASVS-NETWORK)** — TLS pinning bypass + intercept (`ssl-pinning-universal.js`, `flutter*`); cleartext; cert validation.
+- [ ] **Platform/IPC (MASVS-PLATFORM)** — exported components, deep links, providers, WebViews (`attack-surface.sh`).
+- [ ] **Resilience (MASVS-RESILIENCE)** — root/JB, anti-debug, emulator, integrity, obfuscation (bypass scripts; `commercial-protectors.md`).
+- [ ] **Code quality (MASVS-CODE)** — injection, memory safety (fuzzing: `afl-fuzzing`, `fuzz-source`).
+- [ ] **Backend/API** — authz/IDOR/BOLA on the endpoints found (against a local/authorized instance).

@@ -23,13 +23,13 @@ checked against the live repo. Legend: ☐ todo · ◐ in progress · ☑ done.
 
 | Item | Where | Status |
 |---|---|---|
-| `apk-mitm` wrapper (one-command auto de-pin) | command/doc | ☐ |
-| **RMS (Runtime Mobile Security)** — Frida GUI for mass-hook/enumerate | note in `docs/frida-objection.md` | ☐ |
-| Frida/Objection **version-hell** troubleshooting (frida-server↔frida-tools match, rebuild `frida-java-bridge`) | box in `docs/frida-objection.md` | ☐ |
-| Burp CA via **Magisk conscrypt-APEX module** (rootAVD/x86_64 users) | `docs/MCP-SETUP.md` | ☐ |
-| **RN remote-debug / dev-mode** (`__DEV__`, `getUseDeveloperSupport`, Metro + Chrome DevTools, live reload) | `docs/react-native.md` | ☐ |
+| `apk-mitm` wrapper (one-command auto de-pin) | `patch-apk.sh depin` | ☑ |
+| **RMS (Runtime Mobile Security)** | `docs/frida-objection.md` | ☑ |
+| Frida/Objection **version-hell** troubleshooting | `docs/frida-objection.md` | ☑ |
+| Burp CA via **Magisk conscrypt-APEX module** | `docs/MCP-SETUP.md` | ☑ |
+| **RN remote-debug / dev-mode** | `docs/react-native.md` | ☑ |
 | iOS **static binary-patch + re-sign** (Hopper/Ghidra NOP-return → export → re-sign) | `docs/ios-nojailbreak.md` | ☑ |
-| **MASTG** methodology checklist | `docs/WORKFLOW.md` | ☐ |
+| **MASTG** methodology checklist | `docs/WORKFLOW.md` | ☑ |
 | Flutter **manual-offset unpin fallback** (Ghidra locate `ssl_..._verify_cert_chain`) | `docs/flutter.md` (tier 3) | ☑ |
 
 ## Deliberately skipped (low value for mobile RE)
