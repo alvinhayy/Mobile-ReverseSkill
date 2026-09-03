@@ -8,7 +8,7 @@ checked against the live repo. Legend: ☐ todo · ◐ in progress · ☑ done.
 
 | P | Item | Artifact(s) | Why | Status |
 |---|---|---|---|---|
-| 1 | **React Native dynamic instrumentation** | `runtime/rn-frida-hook.js` + `docs/react-native.md` | Biggest hole — repo has RN *static* only. Hook `getJSBundleFile` / `loadScriptFromAssets` (inject JS), `XMLHttpRequest._interceptor`/`open`, `JSON.parse/stringify` → intercept RN traffic & logic. | ☐ |
+| 1 | **React Native dynamic instrumentation** | `runtime/rn-frida-hook.js` + `docs/react-native.md` | Biggest hole — repo had RN *static* only. Hooks RN network (OkHttp), JS↔native bridge, AsyncStorage, bundle load; + remote-debug/dev-mode workflow. | ☑ |
 | 2 | **Merge split APKs (XAPK/APKS → 1 APK)** | `scripts/merge-apks.sh` (APKEditor / AntiSplit-M) + `/re-static` prestep | Prerequisite for patching / reFlutter / apk-mitm. The repo's own targets are split; without a merge you hit "App not installed". | ☐ |
 | 3 | **Static patch-and-resign** | `scripts/patch-apk.sh` + `.claude/commands/patch-apk.md` | Repo is 100% dynamic today. Mandatory fallback when RASP kills Frida: smali `isRooted→false` / null pinning → `apktool b` → `apksigner` → install. | ☐ |
 | 4 | **Non-jailbroken iOS pipeline** | `docs/ios-nojailbreak.md` | Whole missing workflow: decrypt → **ios-app-signer (keep get-task-allow)** → Sideloadly/AltStore / `ideviceinstaller` → `objection explore` on a stock device. | ☐ |
