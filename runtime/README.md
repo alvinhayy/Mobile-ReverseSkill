@@ -31,3 +31,22 @@ contracted to test.
 Pair these Frida scripts with **[uiautomator2-mcp](https://github.com/fdciabdul/uiautomator2-mcp)**
 so the agent can launch the app, dump the UI, and tap through to the screen you want to observe.
 Setup: [`../docs/MCP-SETUP.md`](../docs/MCP-SETUP.md).
+
+## Universal bypass scripts (Android + iOS)
+
+Ready-to-use, target-agnostic bypasses (see [`../docs/bypass-reference.md`](../docs/bypass-reference.md)):
+
+| Script | Platform | Bypasses |
+|---|---|---|
+| `android-root-bypass.js` | Android | RootBeer (8 checks), `Build.TAGS`→release-keys, hide magisk/frida/xposed pkgs, `isDebuggerConnected` |
+| `android-antidebug.js` | Android | `ptrace(TRACEME)`, `/proc/self/status` TracerPid, `Debug.isDebuggerConnected` |
+| `ssl-pinning-universal.js` | Android | OkHttp CertificatePinner, Conscrypt TrustManagerImpl, WebView SslErrorHandler, native `SSL_get_verify_result` |
+| `ios-bypass.js` | iOS | jailbreak (file/fork/dyld/scheme/sysctl), anti-debug (PT_DENY_ATTACH), SSL (`SecTrustEvaluate`) |
+
+```bash
+frida -U -f <pkg>       -l runtime/android-root-bypass.js -l runtime/ssl-pinning-universal.js
+frida -U -f <bundle-id> -l runtime/ios-bypass.js
+```
+Prefer objection for a one-liner where it works (`android/ios sslpinning disable`, `android root disable`,
+`ios jailbreak disable`). References: [`../docs/frida-objection.md`](../docs/frida-objection.md),
+[`../docs/ios-reversing.md`](../docs/ios-reversing.md).

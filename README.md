@@ -103,6 +103,10 @@ runtime/               Frida helper scripts (TLS unpinning, emulator/RASP/attest
 docs/
   WORKFLOW.md          end-to-end mobile-RE workflow guide (toolchain, rooting, fuzzing)
   MCP-SETUP.md         runtime device-automation MCP setup (uiautomator2-mcp)
+  TOOLING.md           per-stack static-analysis toolchain matrix
+  bypass-reference.md  root/jailbreak/anti-debug/SSL-pinning bypass reference
+  frida-objection.md   Frida + Objection deep usage (APIs, commands, gadget deployment)
+  ios-reversing.md     iOS RE (IPA decrypt, Mach-O, ObjC/Swift, jailbreak bypass)
 ```
 
 ## Frida runtime helpers (`runtime/`)
