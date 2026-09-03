@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "AGENTS.md",
+    "skills/reverse-engineer/SKILL.md",
+    "skills/afl-fuzzing/SKILL.md",
+    "docs/TOOLING.md",
+    "docs/bypass-reference.md"
+  ],
+  "mcp": {
+    "uiautomator2": {
+      "type": "local",
+      "command": ["python3", "~/tools/uiautomator2-mcp/server.py"],
+      "enabled": false
+    }
+  }
+}
