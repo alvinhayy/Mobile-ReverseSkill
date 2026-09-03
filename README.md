@@ -55,6 +55,21 @@ to use anywhere:
 | `/spawn [avd-name]` | Boot a rooted KernelSU AVD — auto-picks the only one, else `/spawn <name>` |
 | `/setup [burp\|httptoolkit\|all]` | Prep dynamic analysis — install the proxy CA in the trust store + start `frida-server` |
 
+### Interactive / long-running steps open in a new tab
+
+Commands that need a live CLI (frida REPL, emulator boot, `frida-server`, a fuzz campaign)
+launch it in a **new terminal tab** via `scripts/run-in-tab.sh <label> "<command>"` so you can
+watch and interact — while the whole session is mirrored to `~/.mre-runs/<label>-<ts>.log`, which
+the agent tails to keep monitoring. Uses `script -q` (TTY preserved, so the frida REPL still
+works). If macOS **Automation** isn't granted (first use prompts: System Settings → Privacy &
+Security → Automation → allow your terminal to control iTerm), it falls back to a logged
+background run — the process still runs and stays monitorable. Standalone:
+
+```bash
+scripts/run-in-tab.sh frida "frida -U -f com.example.targetapp -l runtime/flutter-tls.js"
+tail -f ~/.mre-runs/frida-*.log
+```
+
 ## Tooling & multi-stack (staged)
 
 Static-analysis + decompiler toolchain covering **Android · Flutter · React Native · iOS**

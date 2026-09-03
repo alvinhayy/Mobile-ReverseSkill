@@ -31,7 +31,8 @@ FV=$(frida --version); ABI=$(adb shell getprop ro.product.cpu.abi | tr -d '\r') 
 # download github.com/frida/frida/releases/download/$FV/frida-server-$FV-android-$ABI.xz, then unxz
 adb push frida-server /data/local/tmp/frida-server
 adb shell su 0 chmod 755 /data/local/tmp/frida-server
-adb shell "su 0 /data/local/tmp/frida-server &"
+# run frida-server in its own tab (user sees its output; you monitor $LOG):
+LOG=$(scripts/run-in-tab.sh frida-server "adb shell su 0 /data/local/tmp/frida-server -l 0.0.0.0")
 frida-ps -U | head        # sanity: process list over USB/emulator
 ```
 
