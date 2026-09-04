@@ -34,3 +34,18 @@ Figma screen.
 - Dynamic traffic hits the authorized/local backend only.
 
 _Tooling: open-figma-mcp (pradityaaldi), uiautomator2-mcp, runtime/ Frida scripts._
+
+## Figma in the browser / cloud (no desktop) — REST API
+`open-figma-mcp` needs the **desktop** app (its `ws://localhost:3055` bridge is blocked as
+mixed-content from an `https://` browser tab). For **browser/cloud Figma**, use the token-based
+**REST API** instead — works with any file your token can access, no plugin:
+```bash
+# get a Personal Access Token: Figma → Settings → Security → Personal access tokens
+export FIGMA_API_KEY=figd_xxx
+# Claude Code:
+claude mcp add figma-rest -- npx -y figma-developer-mcp --figma-api-key=$FIGMA_API_KEY --stdio
+# opencode: already added (mcp.figma-rest, reads $FIGMA_API_KEY)
+```
+Tools: `get_figma_data` (file/node layout tree) + `download_figma_images`. Give it the **file URL
+or node link** of the scoped frames (copy-link in the browser). `/scope-flow` uses whichever Figma
+MCP is connected — `open-figma-mcp` (desktop plugin) **or** `figma-rest` (browser/cloud token).

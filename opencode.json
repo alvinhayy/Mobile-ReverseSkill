@@ -32,6 +32,19 @@
         "open-figma-mcp"
       ],
       "enabled": false
+    },
+    "figma-rest": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "figma-developer-mcp",
+        "--stdio"
+      ],
+      "environment": {
+        "FIGMA_API_KEY": "{env:FIGMA_API_KEY}"
+      },
+      "enabled": false
     }
   }
 }

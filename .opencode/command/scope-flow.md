@@ -8,9 +8,10 @@ Analyze **only** the in-scope feature flow of `$ARGUMENTS`. The Figma design is 
 contract** (which screens/actions are allowed) and the **oracle** (expected behavior). Stay strictly
 inside the flow — if something requires acting outside it, STOP and flag it.
 
-### 1. Ingest scope from Figma (open-figma-mcp)
-- `figma_status` (dot green — Figma desktop open, plugin running). If not connected, tell the user
-  to run the plugin (see `docs/figma-scoped-analysis.md`).
+### 1. Ingest scope from Figma (desktop: open-figma-mcp · browser/cloud: figma-rest)
+- **Desktop**: `figma_status` (green) then select the frames. **Browser/cloud**: use `figma-rest`
+  `get_figma_data` with the file/node URL of the scoped frames (needs `FIGMA_API_KEY`). See
+  `docs/figma-scoped-analysis.md`.
 - Have the user select the feature's frames, then `figma_get_selection` +
   `figma_get_metadata` (ordered screens, element names/text, inputs, buttons) +
   `figma_screenshot` each frame. Read prototype interactions for navigation order.
