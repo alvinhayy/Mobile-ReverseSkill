@@ -23,6 +23,15 @@
         "~/tools/uiautomator2-mcp/server.py"
       ],
       "enabled": false
+    },
+    "open-figma-mcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "open-figma-mcp"
+      ],
+      "enabled": false
     }
   }
 }

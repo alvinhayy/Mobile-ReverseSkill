@@ -53,6 +53,7 @@ to use anywhere:
 | `/fuzz-source <url\|path> <entry-fn>` | Coverage-guided fuzz an **open-source** C/C++ lib on the host (AFL++/libFuzzer, source-instrumented) |
 | `/frida-run <package> [script.js ...]` | Spawn the app with `runtime/` bypass scripts attached |
 | `/observe-runtime <package> [re-out]` | Autonomous runtime observation — reads static protections+flow, attaches the right bypasses, drives the app via `uiautomator2-mcp`, correlates behavior |
+| `/scope-flow <package>` | Scope-constrained runtime analysis of ONE feature flow, driven by its Figma design (open-figma-mcp) |
 | `/merge-apks <dir|xapk|apks|apkm>` | Merge a split app into one installable signed APK (APKEditor) |
 | `/patch-apk <apk>` | Static patch/rebuild/re-sign (decompile→smali→apktool b→apksigner), or `depin` via apk-mitm |
 | `/root-avd [api]` | Rooted AVD (KernelSU on Apple Silicon, Magisk on x86_64) |
