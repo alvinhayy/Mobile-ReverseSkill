@@ -28,6 +28,7 @@ third-party production. Fuzzing runs offline (local libs / emulator).
 - Recon/dump: **`rn-frida-hook.js`** (RN network/bridge/AsyncStorage/bundle), **`crypto-dump.js`**
   (keys/IV + Cipher/Mac I/O), **`registernatives-dump.js`** (JNI → native offsets, e.g. Appdome `libloader.so`)
 - Device UI automation via the `uiautomator2` MCP (`docs/MCP-SETUP.md`); camoufox MCP for stealth web.
+- Figma flow ingest (for `/scope-flow`): **open-figma-mcp** (desktop plugin, no token) or **figma-rest** (browser/cloud, `FIGMA_API_KEY`) — auto-selected.
 
 ## Fuzzing (`skills/afl-fuzzing/`, `scripts/`)
 - `afl-fuzzing` — on-device AFL++ for Android native libs (**always validate the harness reaches the

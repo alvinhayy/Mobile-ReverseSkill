@@ -8,15 +8,16 @@ Analyze **only** the in-scope feature flow of `$ARGUMENTS`. The Figma design is 
 contract** (which screens/actions are allowed) and the **oracle** (expected behavior). Stay strictly
 inside the flow — if something requires acting outside it, STOP and flag it.
 
-### 1. Ingest scope from Figma (desktop: open-figma-mcp · browser/cloud: figma-rest)
-- **Desktop**: `figma_status` (green) then select the frames. **Browser/cloud**: use `figma-rest`
-  `get_figma_data` with the file/node URL of the scoped frames (needs `FIGMA_API_KEY`). See
-  `docs/figma-scoped-analysis.md`.
-- Have the user select the feature's frames, then `figma_get_selection` +
-  `figma_get_metadata` (ordered screens, element names/text, inputs, buttons) +
-  `figma_screenshot` each frame. Read prototype interactions for navigation order.
-- Write a **SCOPE CONTRACT**: the ordered in-scope screens, the in-scope inputs/actions, and any
-  endpoint/field hints. Everything not in these frames is OUT OF SCOPE.
+### 1. Ingest scope from Figma — auto-select the source (adapts to the user)
+Pick whichever Figma MCP is ready; don't make the user choose:
+- **Desktop first**: call `figma_status` (open-figma-mcp). If green → `figma_get_selection` +
+  `figma_get_metadata` + `figma_screenshot` on the selected feature frames.
+- **Else browser/cloud**: use `figma-rest` `get_figma_data` (+ `download_figma_images`) on the
+  file/node URL the user pastes (needs `FIGMA_API_KEY`).
+- If neither is ready, offer both (open the desktop plugin **or** set `FIGMA_API_KEY` + paste the
+  frame URL) and stop. State which source you used.
+- From either source build a **SCOPE CONTRACT**: ordered in-scope screens, inputs/actions,
+  endpoint/field hints. Anything not in these frames is OUT OF SCOPE.
 
 ### 2. Lab + scoped instrumentation
 - Device up (`/spawn`), frida ready (`/setup`), `connect_device`, app installed.
