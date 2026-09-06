@@ -13,6 +13,7 @@ findings/
 # os / editor
 .DS_Store
 *.swp
+.zcode/
 
 # analysis outputs — contain decompiled TARGET code, never commit
 *_out/

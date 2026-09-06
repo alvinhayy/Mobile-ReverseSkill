@@ -1,4 +1,4 @@
-# Mobile-ReverseSkill — agent guide (opencode)
+# Mobile-ReverseSkill — agent guide (all agents)
 
 Reusable toolkit for **authorized** mobile reverse engineering, dynamic analysis, and fuzzing
 (Android + iOS). This file orients the agent; deep docs are in `docs/`, skills in `skills/`,
@@ -39,9 +39,14 @@ third-party production. Fuzzing runs offline (local libs / emulator).
 `scripts/run-in-tab.sh <label> "<command>"` opens it in a new terminal tab (frida REPL, emulator
 boot, frida-server, AFL TUI) and mirrors to `~/.mre-runs/<label>-*.log` for the agent to tail.
 
-## Commands (`.opencode/command/`)
+## Commands (`commands/` — canonical)
 `/re-static`, `/merge-apks`, `/patch-apk`, `/frida-run`,
 `/observe-runtime`, `/fuzz-build`, `/fuzz-validate`, `/fuzz-run`, `/fuzz-source`, `/spawn`, `/setup`, `/root-avd`.
+
+Canonical source: `commands/*.md`. `scripts/sync-providers.sh` generates every provider's
+copy (`.claude/commands/`, `.opencode/commands/`, `.agents/commands/`, `.cursor/commands/`,
+`.github/prompts/`, `.windsurf/workflows/`, `.gemini/commands/` as TOML) — edit the
+canonical file, then re-run the sync; never edit generated dirs.
 
 ## Method
 detect stack → static (endpoints/secrets/flow + `attack-surface.sh`) → lab (`/spawn`,`/setup`) →
