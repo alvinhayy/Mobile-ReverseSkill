@@ -310,6 +310,7 @@ Sections: Setup/Decompile · Verify Signing · Hardcoded/URL endpoints (`gf aws-
 ## Attribution
 Vuln-class series © **Niraj Kharel** ([nirajkharel.com.np](https://nirajkharel.com.np/categories/mobile-pentesting/)),
 Mobile Pentesting series (65 posts, 2021–2026), demonstrated against the author's VulnLabApp.
-Commands, patterns, and PoCs quoted verbatim for interoperability; narrative prose condensed with
-per-class source links. No open license is declared on the source — keep this reference to
-private/research use, or obtain the author's permission before redistributing.
+Commands, patterns, and PoCs quoted verbatim; narrative prose condensed with per-class source
+links. The author has granted permission to include his writing in this open-source project —
+full-text verbatim mirrors of all posts live in
+[`docs/research/mobile-pentesting/`](research/mobile-pentesting/).

@@ -131,4 +131,7 @@ Per class, the reference docs carry the exact PoC — adb `am start` lines, droz
 ## Sources
 
 Class reference adapted from Niraj Kharel's Mobile Pentesting series (65 posts) — commands and
-patterns quoted verbatim, prose condensed, per-class source links in the two docs. Research use.
+patterns quoted verbatim, prose condensed, per-class source links in the two docs. Full-text
+verbatim mirrors of all 65 posts (included with the author's permission for open-source use):
+[`docs/research/mobile-pentesting/`](../../docs/research/mobile-pentesting/) — read the matching
+post there when a Tier-1/2 hit needs deeper confirmation detail.

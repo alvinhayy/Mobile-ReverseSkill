@@ -158,6 +158,8 @@ docs/
   WORKFLOW.md          end-to-end workflow + OWASP MASTG checklist
   vuln-classes-android.md · vuln-classes-ios.md   58 vuln classes: root cause /
                        grep signature / PoC / fix (adapted from Niraj Kharel's series)
+  research/mobile-pentesting/   full-text verbatim archive of the 65-post source series
+                       (included with the author's permission for open-source use)
   TOOLING.md           per-stack toolchain matrix (+ iOS lab tooling)
   MCP-SETUP.md         device-automation MCP (uiautomator2) + Burp CA routes
   bypass-reference.md · frida-objection.md   root/JB/anti-debug/SSL + Frida/Objection/RMS
