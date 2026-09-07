@@ -7,6 +7,7 @@ skills/afl-fuzzing/out/
 *.apk
 *.xapk
 *.aab
+*.idsig
 # never commit target data / findings
 findings/
 **/*_findings/
@@ -22,3 +23,6 @@ analysis/
 *.dex
 *.jar
 detect.txt
+
+# RE targets (never commit APKs/secrets)
+targets/

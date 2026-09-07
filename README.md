@@ -87,6 +87,7 @@ matrix above. To use them outside this repo, install user-globally with
 | Command | Does |
 |---|---|
 | `/re-static <apk\|ipa\|bundle>` | Static analysis via the `reverse-engineer` skill (endpoints, secrets, deception) |
+| `/vuln-hunt <apk\|ipa\|jadx_out>` | Vulnerability-class hunt via the `mobile-vuln-hunt` skill — rg signatures + optional semgrep taint, triage, per-class PoC |
 | `/fuzz-build [lib.so]` | Build AFL++ for Android + harness, push to the emulator |
 | `/fuzz-validate [lib.so]` | Prove the harness reaches the target (poison-pointer / under-alloc controls) |
 | `/fuzz-run [seconds]` | Run the on-device campaign and triage crashes |
