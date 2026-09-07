@@ -15,6 +15,8 @@ third-party production. Fuzzing runs offline (local libs / emulator).
 - `scripts/analyze-flutter.sh` (blutter, reFlutter) · `scripts/analyze-rn.sh` (Hermes/JSC) · `scripts/analyze-ios.sh`
 - `scripts/attack-surface.sh <apk>` → exported components, deep links, providers, risky flags (+ `am start` line)
 - `scripts/install-tools.sh --stack <android|flutter|rn|ios|cross> --check`
+- Vuln-class hunt after static: **`mobile-vuln-hunt`** skill — rg signatures (+ optional semgrep
+  taint) over `jadx_out/`/`classdump_out/`, per-class PoCs in `docs/vuln-classes-{android,ios}.md`
 
 ## APK handling (`scripts/`)
 - `scripts/merge-apks.sh <dir|xapk|apks|apkm>` → one signed APK (APKEditor) — do this before patching split apps
