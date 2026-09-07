@@ -42,7 +42,7 @@ third-party production. Fuzzing runs offline (local libs / emulator).
 boot, frida-server, AFL TUI) and mirrors to `~/.mre-runs/<label>-*.log` for the agent to tail.
 
 ## Commands (`commands/` — canonical)
-`/re-static`, `/vuln-hunt`, `/merge-apks`, `/patch-apk`, `/frida-run`,
+`/re-static`, `/vuln-hunt`, `/pull-apps`, `/merge-apks`, `/patch-apk`, `/frida-run`,
 `/observe-runtime`, `/fuzz-build`, `/fuzz-validate`, `/fuzz-run`, `/fuzz-source`, `/spawn`, `/setup`, `/root-avd`.
 
 Canonical source: `commands/*.md`. `scripts/sync-providers.sh` generates every provider's
