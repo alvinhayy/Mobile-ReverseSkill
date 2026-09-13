@@ -59,6 +59,17 @@ any project afterwards):
 curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash
 ```
 
+Or target specific providers only — pass names after `-s --` (valid: `all claude codex
+opencode zcode cursor gemini copilot windsurf`):
+
+```bash
+# Codex only
+curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash -s -- codex
+
+# Codex + Claude Code
+curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash -s -- codex claude
+```
+
 Equivalent without curl-piping (clone + install + clean up):
 
 ```bash
@@ -81,10 +92,11 @@ are already in each tool's native directories.
 git clone https://github.com/alvinhayy/Mobile-ReverseSkill
 ```
 
-**User-global** (same as the quick install, from an existing clone):
+**User-global** (same as the quick install, from an existing clone — optional provider names):
 
 ```bash
-scripts/sync-providers.sh --user
+scripts/sync-providers.sh --user           # every provider
+scripts/sync-providers.sh --user codex     # Codex only (skills + prompts)
 ```
 
 **Per-skill via [skillfish](https://skill.fish)** (skills only):

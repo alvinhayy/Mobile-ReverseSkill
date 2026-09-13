@@ -25,18 +25,29 @@
 #
 #   ./sync-providers.sh             regenerate the in-repo provider dirs
 #   ./sync-providers.sh --check     report drift only (CI-friendly; exit 1 on drift)
-#   ./sync-providers.sh --user      install skills + commands into user-global dirs
+#   ./sync-providers.sh --user              install skills + commands into user-global dirs
+#   ./sync-providers.sh --user codex        only Codex (skills + slash commands)
+#   ./sync-providers.sh --user codex claude several providers at once
+#   ./sync-providers.sh --user all          every provider (same as no args)
+#
+#   Providers: all claude codex opencode zcode cursor gemini copilot windsurf
 set -uo pipefail
 
 MODE="sync"
+PROVIDERS=()
 while [ $# -gt 0 ]; do
   case "$1" in
     --check) MODE="check"; shift;;
     --user)  MODE="user";  shift;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0;;
-    *) echo "unknown arg: $1" >&2; exit 2;;
+    -*) echo "unknown arg: $1" >&2; exit 2;;
+    *) PROVIDERS+=("$1"); shift;;
   esac
 done
+if [ "$MODE" != "user" ] && [ ${#PROVIDERS[@]} -gt 0 ]; then
+  echo "error: provider names are only valid with --user" >&2
+  exit 2
+fi
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
@@ -160,31 +171,51 @@ check(){
 }
 
 user_install(){
-  local stage="$1" s base f
-  for s in "$stage"/agents-skills/*/; do
-    s="${s%/}"; base="${s##*/}"
-    mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex/skills"
-    rm -rf "$HOME/.agents/skills/$base" "$HOME/.claude/skills/$base" "$HOME/.codex/skills/$base"
-    cp -R "$s" "$HOME/.agents/skills/$base"
-    cp -R "$stage/claude-skills/$base" "$HOME/.claude/skills/$base"
-    cp -R "$stage/codex-skills/$base" "$HOME/.codex/skills/$base"
-    ok "skill $base" "~/.agents/skills + ~/.claude/skills + ~/.codex/skills"
+  local stage="$1"; shift
+  local providers=("$@")
+  [ ${#providers[@]} -eq 0 ] && providers=(claude codex opencode zcode cursor gemini copilot windsurf)
+  local p i s f base sdst cdst cmode
+  for i in "${!providers[@]}"; do
+    if [ "${providers[$i]}" = "all" ]; then
+      providers=(claude codex opencode zcode cursor gemini copilot windsurf)
+      break
+    fi
   done
-  mkdir -p "$HOME/.claude/commands" "$HOME/.agents/commands" \
-           "$HOME/.config/opencode/commands" "$HOME/.gemini/commands" \
-           "$HOME/.codex/prompts"
-  for f in "$stage"/claude-commands/*.md; do
-    cp "$f" "$HOME/.claude/commands/"
-    cp "$f" "$HOME/.agents/commands/"
-    cp "$f" "$HOME/.config/opencode/commands/"
+  for p in "${providers[@]}"; do
+    sdst=""; cdst=""; cmode="md"
+    case "$p" in
+      claude)   sdst="$HOME/.claude/skills";  cdst="$HOME/.claude/commands";;
+      codex)    sdst="$HOME/.codex/skills";   cdst="$HOME/.codex/prompts";;
+      opencode) sdst="$HOME/.agents/skills";  cdst="$HOME/.config/opencode/commands";;
+      zcode)    sdst="$HOME/.agents/skills";  cdst="$HOME/.agents/commands";;
+      cursor)   sdst="$HOME/.agents/skills";  cdst="$HOME/.cursor/commands";;
+      gemini)   sdst="$HOME/.agents/skills";  cdst="$HOME/.gemini/commands"; cmode="toml";;
+      copilot|windsurf)
+        sdst="$HOME/.agents/skills"
+        note "provider $p — skills only (commands/prompts are workspace-level; use the in-repo dirs)"
+        ;;
+      *)
+        echo "error: unknown provider '$p' — valid: all claude codex opencode zcode cursor gemini copilot windsurf" >&2
+        exit 2;;
+    esac
+    if [ -n "$sdst" ]; then
+      mkdir -p "$sdst"
+      for s in "$stage"/agents-skills/*/; do
+        base="$(basename "${s%/}")"
+        rm -rf "$sdst/$base"
+        cp -R "${s%/}" "$sdst/$base"
+      done
+    fi
+    if [ -n "$cdst" ]; then
+      mkdir -p "$cdst"
+      if [ "$cmode" = "toml" ]; then
+        for f in "$stage"/gemini-commands/*.toml; do cp "$f" "$cdst/"; done
+      else
+        for f in "$stage"/claude-commands/*.md; do cp "$f" "$cdst/"; done
+      fi
+    fi
+    ok "provider $p" "skills → ${sdst:--} · commands → ${cdst:-- (skills only)}"
   done
-  for f in "$stage"/codex-prompts/*.md; do
-    cp "$f" "$HOME/.codex/prompts/"
-  done
-  for f in "$stage"/gemini-commands/*.toml; do
-    cp "$f" "$HOME/.gemini/commands/"
-  done
-  note "commands → ~/.claude/commands, ~/.agents/commands, ~/.config/opencode/commands (md), ~/.codex/prompts (md) + ~/.gemini/commands (toml)"
 }
 
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/mre-sync.XXXXXX")"
@@ -194,5 +225,5 @@ build_staging "$STAGE"
 case "$MODE" in
   sync) deploy "$STAGE"; note "provider dirs regenerated from skills/ + commands/";;
   check) check "$STAGE" && note "no drift" || { note "drift detected"; exit 1; };;
-  user)  user_install "$STAGE"; note "user-global install done";;
+  user)  user_install "$STAGE" ${PROVIDERS[@]+"${PROVIDERS[@]}"}; note "user-global install done";;
 esac
