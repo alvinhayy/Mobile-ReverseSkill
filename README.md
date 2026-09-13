@@ -40,7 +40,7 @@ generated from the canonical sources (`skills/`, `commands/`, `AGENTS.md`) by
 | Claude Code | `.claude/skills/` | `.claude/commands/` | `CLAUDE.md` → `@AGENTS.md` |
 | opencode | `.agents/skills/` | `.opencode/commands/` | `AGENTS.md` |
 | ZCode | `.agents/skills/` | `.agents/commands/` | `AGENTS.md` |
-| Codex CLI | `.codex/skills/` (also scans `.agents/skills/`) | `.codex/prompts/` | `AGENTS.md` |
+| Codex CLI | `.codex/skills/` (also scans `.agents/skills/`) | — custom slash prompts removed upstream; skills are model-invoked — type the command text (e.g. `/re-static app.apk`) and the skill fires | `AGENTS.md` |
 | Gemini CLI | `.agents/skills/` | `.gemini/commands/` (TOML) | `GEMINI.md` → `@AGENTS.md` |
 | Cursor | `.agents/skills/` | `.cursor/commands/` | `AGENTS.md` |
 | Copilot (VS Code) | `.agents/skills/` | `.github/prompts/` | `AGENTS.md` |
@@ -90,7 +90,7 @@ What it installs user-globally:
 | Type | Destinations |
 |---|---|
 | Skills | `~/.claude/skills/` · `~/.codex/skills/` · `~/.agents/skills/` |
-| Slash commands | `~/.claude/commands/` · `~/.codex/prompts/` · `~/.config/opencode/commands/` · `~/.agents/commands/` · `~/.gemini/commands/` |
+| Slash commands | `~/.claude/commands/` · `~/.config/opencode/commands/` · `~/.agents/commands/` · `~/.gemini/commands/` (Codex has none — skills only) |
 
 **In-repo (every agent):** clone and open the repo — skills, commands, and the guide
 are already in each tool's native directories.

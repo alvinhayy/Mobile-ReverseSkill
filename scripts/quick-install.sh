@@ -15,6 +15,8 @@
 #   curl -fsSL .../quick-install.sh | bash -s -- codex claude
 #
 # Providers: all claude codex opencode zcode cursor gemini copilot windsurf
+# (codex = skills only — Codex has no user-defined slash commands; its skills
+#  are model-invoked, so typing e.g. "/re-static app.apk" as text still works)
 #
 # From a clone, the equivalent is: scripts/sync-providers.sh --user [providers...]
 # Env overrides: REPO (default alvinhayy/Mobile-ReverseSkill), BRANCH (default main).

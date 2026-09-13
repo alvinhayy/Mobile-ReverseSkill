@@ -47,8 +47,10 @@ boot, frida-server, AFL TUI) and mirrors to `~/.mre-runs/<label>-*.log` for the 
 
 Canonical source: `commands/*.md`. `scripts/sync-providers.sh` generates every provider's
 copy (`.claude/commands/`, `.opencode/commands/`, `.agents/commands/`, `.cursor/commands/`,
-`.codex/prompts/`, `.github/prompts/`, `.windsurf/workflows/`, `.gemini/commands/` as TOML) —
+`.github/prompts/`, `.windsurf/workflows/`, `.gemini/commands/` as TOML) —
 edit the canonical file, then re-run the sync; never edit generated dirs.
+Codex has no user-defined slash commands (its slash menu is built-ins only) — it gets
+**skills only** (`.codex/skills/`, model-invoked; typing `/re-static …` as text still works).
 
 ## Method
 detect stack → static (endpoints/secrets/flow + `attack-surface.sh`) → lab (`/spawn`,`/setup`) →

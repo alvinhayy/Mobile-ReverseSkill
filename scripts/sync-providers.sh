@@ -8,13 +8,13 @@
 #   .agents/skills/        skills — Cursor, Copilot/VS Code, Amp, Crush,
 #                          Windsurf, opencode, Gemini CLI, ZCode
 #   .claude/skills/        skills — Claude Code (reads only .claude/)
-#   .codex/skills/         skills — Codex CLI (project-level)
+#   .codex/skills/         skills — Codex CLI (project-level; Codex has NO
+#                          user-defined slash commands — its slash menu is
+#                          built-ins only and skills are model-invoked)
 #   .claude/commands/      slash commands — Claude Code
 #   .opencode/commands/    slash commands — opencode
 #   .agents/commands/      slash commands — ZCode (+ tools following .agents)
 #   .cursor/commands/      slash commands — Cursor
-#   .codex/prompts/        slash commands — Codex CLI (same frontmatter:
-#                          description + argument-hint; $ARGUMENTS is native)
 #   .github/prompts/       prompt files — GitHub Copilot / VS Code (*.prompt.md)
 #   .windsurf/workflows/   workflows — Windsurf
 #   .gemini/commands/      commands — Gemini CLI (TOML, $ARGUMENTS -> {{args}})
@@ -26,7 +26,7 @@
 #   ./sync-providers.sh             regenerate the in-repo provider dirs
 #   ./sync-providers.sh --check     report drift only (CI-friendly; exit 1 on drift)
 #   ./sync-providers.sh --user              install skills + commands into user-global dirs
-#   ./sync-providers.sh --user codex        only Codex (skills + slash commands)
+#   ./sync-providers.sh --user codex        only Codex (skills — Codex has no custom slash commands)
 #   ./sync-providers.sh --user codex claude several providers at once
 #   ./sync-providers.sh --user all          every provider (same as no args)
 #
@@ -105,7 +105,7 @@ build_staging(){
   for f in commands/*.md; do
     base="$(basename "$f" .md)"
     local d
-    for d in claude-commands opencode-commands agents-commands cursor-commands windsurf-workflows codex-prompts; do
+    for d in claude-commands opencode-commands agents-commands cursor-commands windsurf-workflows; do
       mkdir -p "$stage/$d"; cp "$f" "$stage/$d/$base.md"
     done
     mkdir -p "$stage/copilot-prompts"; cp "$f" "$stage/copilot-prompts/$base.prompt.md"
@@ -128,7 +128,6 @@ TARGETS=(
   ".opencode/commands:opencode-commands"
   ".agents/commands:agents-commands"
   ".cursor/commands:cursor-commands"
-  ".codex/prompts:codex-prompts"
   ".github/prompts:copilot-prompts"
   ".windsurf/workflows:windsurf-workflows"
   ".gemini/commands:gemini-commands"
@@ -185,7 +184,7 @@ user_install(){
     sdst=""; cdst=""; cmode="md"
     case "$p" in
       claude)   sdst="$HOME/.claude/skills";  cdst="$HOME/.claude/commands";;
-      codex)    sdst="$HOME/.codex/skills";   cdst="$HOME/.codex/prompts";;
+      codex)    sdst="$HOME/.codex/skills";;  # no user-defined slash commands; skills are model-invoked
       opencode) sdst="$HOME/.agents/skills";  cdst="$HOME/.config/opencode/commands";;
       zcode)    sdst="$HOME/.agents/skills";  cdst="$HOME/.agents/commands";;
       cursor)   sdst="$HOME/.agents/skills";  cdst="$HOME/.cursor/commands";;
