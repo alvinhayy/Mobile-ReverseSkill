@@ -56,6 +56,12 @@ generated from the canonical sources (`skills/`, `commands/`, `AGENTS.md`) by
 any project afterwards):
 
 ```bash
+curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash
+```
+
+Equivalent without curl-piping (clone + install + clean up):
+
+```bash
 git clone --depth 1 https://github.com/alvinhayy/Mobile-ReverseSkill /tmp/Mobile-ReverseSkill \
   && /tmp/Mobile-ReverseSkill/scripts/sync-providers.sh --user \
   && rm -rf /tmp/Mobile-ReverseSkill
