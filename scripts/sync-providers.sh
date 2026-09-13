@@ -5,20 +5,23 @@
 # The generated provider dirs are COMMITTED so a plain `git clone` works in
 # every agent with zero setup:
 #
-#   .agents/skills/        skills — Cursor, Copilot/VS Code, Codex, Amp, Crush,
+#   .agents/skills/        skills — Cursor, Copilot/VS Code, Amp, Crush,
 #                          Windsurf, opencode, Gemini CLI, ZCode
 #   .claude/skills/        skills — Claude Code (reads only .claude/)
+#   .codex/skills/         skills — Codex CLI (project-level)
 #   .claude/commands/      slash commands — Claude Code
 #   .opencode/commands/    slash commands — opencode
 #   .agents/commands/      slash commands — ZCode (+ tools following .agents)
 #   .cursor/commands/      slash commands — Cursor
+#   .codex/prompts/        slash commands — Codex CLI (same frontmatter:
+#                          description + argument-hint; $ARGUMENTS is native)
 #   .github/prompts/       prompt files — GitHub Copilot / VS Code (*.prompt.md)
 #   .windsurf/workflows/   workflows — Windsurf
 #   .gemini/commands/      commands — Gemini CLI (TOML, $ARGUMENTS -> {{args}})
 #   CLAUDE.md · GEMINI.md  thin @AGENTS.md import wrappers (Claude Code and
 #                          Gemini don't read AGENTS.md natively)
 #
-#   Codex / Amp / Crush ship no custom-command files — skills cover them.
+#   Amp / Crush ship no custom-command files — skills cover them.
 #
 #   ./sync-providers.sh             regenerate the in-repo provider dirs
 #   ./sync-providers.sh --check     report drift only (CI-friendly; exit 1 on drift)
@@ -84,11 +87,14 @@ build_staging(){
     mkdir -p "$stage/agents-skills" "$stage/claude-skills"
     cp -R "$s" "$stage/agents-skills/$base"
     cp -R "$s" "$stage/claude-skills/$base"
+    mkdir -p "$stage/codex-skills"
+    rm -rf "$stage/codex-skills/$base"
+    cp -R "$s" "$stage/codex-skills/$base"
   done
   for f in commands/*.md; do
     base="$(basename "$f" .md)"
     local d
-    for d in claude-commands opencode-commands agents-commands cursor-commands windsurf-workflows; do
+    for d in claude-commands opencode-commands agents-commands cursor-commands windsurf-workflows codex-prompts; do
       mkdir -p "$stage/$d"; cp "$f" "$stage/$d/$base.md"
     done
     mkdir -p "$stage/copilot-prompts"; cp "$f" "$stage/copilot-prompts/$base.prompt.md"
@@ -106,10 +112,12 @@ build_staging(){
 TARGETS=(
   ".agents/skills:agents-skills"
   ".claude/skills:claude-skills"
+  ".codex/skills:codex-skills"
   ".claude/commands:claude-commands"
   ".opencode/commands:opencode-commands"
   ".agents/commands:agents-commands"
   ".cursor/commands:cursor-commands"
+  ".codex/prompts:codex-prompts"
   ".github/prompts:copilot-prompts"
   ".windsurf/workflows:windsurf-workflows"
   ".gemini/commands:gemini-commands"
@@ -155,23 +163,28 @@ user_install(){
   local stage="$1" s base f
   for s in "$stage"/agents-skills/*/; do
     s="${s%/}"; base="${s##*/}"
-    mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills"
-    rm -rf "$HOME/.agents/skills/$base" "$HOME/.claude/skills/$base"
+    mkdir -p "$HOME/.agents/skills" "$HOME/.claude/skills" "$HOME/.codex/skills"
+    rm -rf "$HOME/.agents/skills/$base" "$HOME/.claude/skills/$base" "$HOME/.codex/skills/$base"
     cp -R "$s" "$HOME/.agents/skills/$base"
     cp -R "$stage/claude-skills/$base" "$HOME/.claude/skills/$base"
-    ok "skill $base" "~/.agents/skills + ~/.claude/skills"
+    cp -R "$stage/codex-skills/$base" "$HOME/.codex/skills/$base"
+    ok "skill $base" "~/.agents/skills + ~/.claude/skills + ~/.codex/skills"
   done
   mkdir -p "$HOME/.claude/commands" "$HOME/.agents/commands" \
-           "$HOME/.config/opencode/commands" "$HOME/.gemini/commands"
+           "$HOME/.config/opencode/commands" "$HOME/.gemini/commands" \
+           "$HOME/.codex/prompts"
   for f in "$stage"/claude-commands/*.md; do
     cp "$f" "$HOME/.claude/commands/"
     cp "$f" "$HOME/.agents/commands/"
     cp "$f" "$HOME/.config/opencode/commands/"
   done
+  for f in "$stage"/codex-prompts/*.md; do
+    cp "$f" "$HOME/.codex/prompts/"
+  done
   for f in "$stage"/gemini-commands/*.toml; do
     cp "$f" "$HOME/.gemini/commands/"
   done
-  note "commands → ~/.claude/commands, ~/.agents/commands, ~/.config/opencode/commands (md) + ~/.gemini/commands (toml)"
+  note "commands → ~/.claude/commands, ~/.agents/commands, ~/.config/opencode/commands (md), ~/.codex/prompts (md) + ~/.gemini/commands (toml)"
 }
 
 STAGE="$(mktemp -d "${TMPDIR:-/tmp}/mre-sync.XXXXXX")"

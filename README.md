@@ -40,7 +40,7 @@ generated from the canonical sources (`skills/`, `commands/`, `AGENTS.md`) by
 | Claude Code | `.claude/skills/` | `.claude/commands/` | `CLAUDE.md` → `@AGENTS.md` |
 | opencode | `.agents/skills/` | `.opencode/commands/` | `AGENTS.md` |
 | ZCode | `.agents/skills/` | `.agents/commands/` | `AGENTS.md` |
-| Codex CLI | `.agents/skills/` | — (custom prompts removed upstream; skills cover it) | `AGENTS.md` |
+| Codex CLI | `.codex/skills/` (also scans `.agents/skills/`) | `.codex/prompts/` | `AGENTS.md` |
 | Gemini CLI | `.agents/skills/` | `.gemini/commands/` (TOML) | `GEMINI.md` → `@AGENTS.md` |
 | Cursor | `.agents/skills/` | `.cursor/commands/` | `AGENTS.md` |
 | Copilot (VS Code) | `.agents/skills/` | `.github/prompts/` | `AGENTS.md` |
@@ -52,6 +52,22 @@ generated from the canonical sources (`skills/`, `commands/`, `AGENTS.md`) by
 
 ## Install
 
+**Quick install — skills + slash commands into every agent** (one command, usable in
+any project afterwards):
+
+```bash
+git clone --depth 1 https://github.com/alvinhayy/Mobile-ReverseSkill /tmp/Mobile-ReverseSkill \
+  && /tmp/Mobile-ReverseSkill/scripts/sync-providers.sh --user \
+  && rm -rf /tmp/Mobile-ReverseSkill
+```
+
+What it installs user-globally:
+
+| Type | Destinations |
+|---|---|
+| Skills | `~/.claude/skills/` · `~/.codex/skills/` · `~/.agents/skills/` |
+| Slash commands | `~/.claude/commands/` · `~/.codex/prompts/` · `~/.config/opencode/commands/` · `~/.agents/commands/` · `~/.gemini/commands/` |
+
 **In-repo (every agent):** clone and open the repo — skills, commands, and the guide
 are already in each tool's native directories.
 
@@ -59,7 +75,7 @@ are already in each tool's native directories.
 git clone https://github.com/alvinhayy/Mobile-ReverseSkill
 ```
 
-**User-global** (skills + commands into `~`, usable in any project):
+**User-global** (same as the quick install, from an existing clone):
 
 ```bash
 scripts/sync-providers.sh --user

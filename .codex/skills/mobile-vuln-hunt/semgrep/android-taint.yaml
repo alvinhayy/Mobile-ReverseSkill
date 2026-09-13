@@ -1,0 +1,109 @@
+# Taint rules for the mobile-vuln-hunt skill — Android (jadx-decompiled Java).
+# Usage: semgrep --config android-taint.yaml jadx_out/
+# These find source->sink FLOW for the classes where flow is the whole bug;
+# always triage against exported components (attack-surface.sh) before reporting.
+rules:
+  - id: android.intent-redirection
+    message: >-
+      Intent/Parcelable extra from getIntent() forwarded to a component launch without a
+      visible allowlist (vuln class A1/A2 — parcelable/intent redirection).
+    severity: WARNING
+    languages: [java]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $I.getParcelableExtra(...)
+          - pattern: $I.getStringExtra(...)
+          - pattern: $I.getExtras()
+    pattern-sinks:
+      - pattern-either:
+          - pattern: $C.startActivity(...)
+          - pattern: $C.startActivityForResult(...)
+          - pattern: $C.startService(...)
+          - pattern: $C.sendBroadcast(...)
+          - pattern: $I2.putExtras(...)
+    pattern-sanitizers:
+      - pattern: $C.getPackageName()
+
+  - id: android.webview-url-injection
+    message: >-
+      Intent-supplied string reaches WebView.loadUrl without scheme validation
+      (vuln class B1 — exported WebView activity injection).
+    severity: WARNING
+    languages: [java]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $I.getStringExtra(...)
+          - pattern: $I.getData(...)
+    pattern-sinks:
+      - pattern: $W.loadUrl(...)
+
+  - id: android.file-write-traversal
+    message: >-
+      Intent-supplied filename/content reaches a file-write sink without canonical-path
+      containment (vuln class C1 — arbitrary file write / path traversal).
+    severity: ERROR
+    languages: [java]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $I.getStringExtra(...)
+          - pattern: $I.getByteArrayExtra(...)
+    pattern-sinks:
+      - pattern-either:
+          - pattern: new FileOutputStream(...)
+          - pattern: $C.openFileOutput(...)
+          - pattern: java.nio.file.Files.write(...)
+          - pattern: java.nio.file.Files.copy(...)
+    pattern-sanitizers:
+      - pattern: $F.getCanonicalPath()
+
+  - id: android.stream-uri-read
+    message: >-
+      Intent-supplied URI reaches ContentResolver.openInputStream without a scheme/authority
+      allowlist (vuln class C2 — arbitrary stream read).
+    severity: WARNING
+    languages: [java]
+    mode: taint
+    pattern-sources:
+      - pattern-either:
+          - pattern: $I.getData(...)
+          - pattern: $I.getParcelableExtra(...)
+    pattern-sinks:
+      - pattern-either:
+          - pattern: $R.openInputStream(...)
+          - pattern: $R.openFileDescriptor(...)
+          - pattern: $R.openAssetFileDescriptor(...)
+
+  - id: android.reflection-from-intent
+    message: >-
+      Intent-supplied class name reaches Class.forName/reflective invocation
+      (vuln class A6 — reflection on intent extras).
+    severity: ERROR
+    languages: [java]
+    mode: taint
+    pattern-sources:
+      - pattern: $I.getStringExtra(...)
+    pattern-sinks:
+      - pattern-either:
+          - pattern: Class.forName(...)
+          - pattern: $C.loadClass(...)
+
+  - id: android.dynamic-code-loading
+    message: >-
+      DexClassLoader found — verify the DEX path is app-private and signature-verified
+      (vuln class E3; triage manually).
+    severity: WARNING
+    languages: [java]
+    pattern-either:
+      - pattern: new DexClassLoader(...)
+      - pattern: new InMemoryDexClassLoader(...)
+
+  - id: android.implicit-broadcast
+    message: >-
+      sendBroadcast without setPackage/permission may leak extras to any app
+      (vuln class A7 — verify no sensitive extras + no setPackage; triage manually).
+    severity: INFO
+    languages: [java]
+    pattern: $C.sendBroadcast(...)
