@@ -70,12 +70,19 @@ curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/
 curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash -s -- codex claude
 ```
 
-Equivalent without curl-piping (clone + install + clean up):
+Equivalent without curl-piping (clone + install; the temp clone is removed
+whether the install succeeds or fails — note the `;` before `rm`):
 
 ```bash
 git clone --depth 1 https://github.com/alvinhayy/Mobile-ReverseSkill /tmp/Mobile-ReverseSkill \
-  && /tmp/Mobile-ReverseSkill/scripts/sync-providers.sh --user \
-  && rm -rf /tmp/Mobile-ReverseSkill
+  && /tmp/Mobile-ReverseSkill/scripts/quick-install.sh; rm -rf /tmp/Mobile-ReverseSkill
+```
+
+Or keep the clone and install from it (reusable, nothing to clean up):
+
+```bash
+git clone https://github.com/alvinhayy/Mobile-ReverseSkill \
+  && ./Mobile-ReverseSkill/scripts/quick-install.sh
 ```
 
 What it installs user-globally:

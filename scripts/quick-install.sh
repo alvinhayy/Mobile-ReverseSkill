@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 # Mobile-ReverseSkill — quick install (curl | bash).
 #
-# Downloads the repo tarball and installs skills + slash commands user-globally
-# via scripts/sync-providers.sh --user. Nothing is kept afterwards.
+# Two modes:
+#   piped (curl | bash ...)   — downloads the repo tarball into a temp dir,
+#                               installs, then always removes it (EXIT trap)
+#   run from a clone          — uses that checkout directly; nothing is
+#                               downloaded or left behind
 #
 #   curl -fsSL https://raw.githubusercontent.com/alvinhayy/Mobile-ReverseSkill/main/scripts/quick-install.sh | bash
 #
@@ -39,15 +42,28 @@ for a in "$@"; do
   esac
 done
 
+# Reuse the checkout this script lives in when it is a full repo clone
+# (has skills/ + commands/) — no download, nothing temporary to clean up.
+# When piped from curl, BASH_SOURCE/$0 point at stdin and this check fails,
+# so the tarball path below is used and cleaned up by the EXIT trap.
+SELF_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || true)"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
+SRC=""
 
-echo "[*] downloading ${REPO}@${BRANCH}"
-curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz" -o "$TMP/repo.tar.gz"
-tar -xzf "$TMP/repo.tar.gz" -C "$TMP"
-SRC="$TMP/${REPO##*/}-${BRANCH}"
+if [ -n "$SELF_DIR" ] && [ -f "$SELF_DIR/sync-providers.sh" ] \
+   && [ -d "$SELF_DIR/../skills" ] && [ -d "$SELF_DIR/../commands" ]; then
+  SRC="$(dirname "$SELF_DIR")"
+  echo "[*] using local checkout: $SRC (no download)"
+else
+  echo "[*] downloading ${REPO}@${BRANCH}"
+  curl -fsSL "https://github.com/${REPO}/archive/refs/heads/${BRANCH}.tar.gz" -o "$TMP/repo.tar.gz"
+  tar -xzf "$TMP/repo.tar.gz" -C "$TMP"
+  SRC="$TMP/${REPO##*/}-${BRANCH}"
+fi
+
 if [ ! -f "$SRC/scripts/sync-providers.sh" ]; then
-  echo "error: unexpected archive layout ($SRC missing)" >&2
+  echo "error: unexpected layout ($SRC missing scripts/sync-providers.sh)" >&2
   exit 1
 fi
 
