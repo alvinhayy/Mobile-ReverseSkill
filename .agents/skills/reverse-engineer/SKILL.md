@@ -257,6 +257,56 @@ Run these independently and in parallel:
 
 ---
 
+### Flutter Pipeline (Dart AOT snapshot — `libapp.so`)
+
+Flutter apps compile Dart ahead-of-time into a native ELF snapshot, `libapp.so` (paired with
+`libflutter.so`). `classes.dex` holds only the thin plugin/shell — app logic, endpoints, and
+keys are **invisible to `jadx`**. Whenever `lib/<abi>/libapp.so` exists, run the
+[blutter](https://github.com/worawit/blutter) pass below. This is a mandatory pipeline stage
+for Flutter targets, not an optional extra.
+
+1. **Detect** — unzip the APK/XAPK and look for `libapp.so` + `libflutter.so` under `lib/`.
+   Always analyze the **arm64** (`arm64-v8a`) lib — pass the `.xapk`, the merged APK, or the
+   `split_config.arm64_v8a.apk` (blutter needs both `libapp.so` and `libflutter.so`; the
+   version of `libflutter.so` selects the Dart runtime to build against).
+
+2. **Install blutter** (one-time; needs Python 3, `cmake`, `ninja`, and a C++20 toolchain —
+   on first run it downloads and builds the Dart SDK matching the target's snapshot, which
+   takes a while but is cached for later runs on the same Dart version):
+   ```bash
+   git clone https://github.com/worawit/blutter
+   pip install -r blutter/requirements.txt   # pyelftools, requests
+   export BLUTTER_HOME="$PWD/blutter"        # this repo's analyze-flutter.sh expects it
+   ```
+
+3. **Run** — it auto-detects the Dart/Flutter version from the snapshot and writes everything
+   to the output dir:
+   ```bash
+   python3 blutter.py app.xapk out/blutter          # XAPK / merged APK
+   python3 blutter.py split_config.arm64_v8a.apk out/blutter   # arm64 split directly
+   python3 blutter.py lib/arm64-v8a/libapp.so out/blutter      # or the .so itself
+   ```
+
+4. **Read the output** (`out/blutter/`):
+   - `asm/` — per-Dart-library pseudo-source: class/function names recovered from the AOT
+     snapshot, string literals, and call structure. This is the primary reading material.
+   - `objs.txt` / `pp.txt` — Dart object pool dump; **URLs, API paths, hard-coded keys and
+     config live here** — run the Secret Detection Patterns regexes over them.
+   - `blutter_frida.js` — a ready-made Frida hook script generated for the *exact* snapshot
+     version; attach it during the dynamic phase instead of writing hooks from scratch.
+
+5. **Feed the other analyses** — treat blutter output as the decompiled source for Flutter
+   targets: run Endpoint Extraction, Secrets Detection, and Deception & Honeypot analysis over
+   `asm/` + `pp.txt` exactly as the APK pipeline does over `jadx_out/`. Dart code builds URLs
+   at runtime (`'https://' + host + path`) just like Java — trace construction before
+   classifying an endpoint as real.
+
+6. **Dynamic companion** — `reFlutter` (`pip install reflutter`) repackages the APK with a
+   patched `libflutter.so` for traffic interception (Flutter's BoringSSL ignores the system
+   proxy and system CAs). Pair with the Frida TLS scripts in `runtime/` of this repo.
+
+---
+
 ### IPA Pipeline
 
 **Phase 1 — Extraction (sequential)**
@@ -1083,6 +1133,7 @@ Read `jadx_out/` (Java), `apktool_out/AndroidManifest.xml`, `strings_out/urls.tx
 
 ### Flutter (stage 2)
 Dart AOT logic lives in `libapp.so` (+ `libflutter.so`), usually in the **arm64 split / .xapk**.
+Manual blutter steps: see the **Flutter Pipeline** section in Step 3 above.
 ```bash
 export BLUTTER_HOME="$HOME/tools/blutter"
 scripts/analyze-flutter.sh app.xapk out/app    # blutter -> out/app/blutter_out/ ; assets_out/
