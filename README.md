@@ -260,8 +260,8 @@ local emulator/device**; nothing targets third-party production infrastructure.
 
 - `afl-fuzzing` builds on [AFL++](https://github.com/AFLplusplus/AFLplusplus) (AGPL-3.0) and the
   Trail of Bits [`aflpp`](https://github.com/trailofbits/skills) skill.
-- `reverse-engineer` methodology adapted from the community gist
-  `binsarjr/adbd5110cd78bbd09a1d9afc0f23c944`.
+- `reverse-engineer` — original full-methodology skill maintained in this repo
+  (`skills/reverse-engineer/`).
 
 Original content in this repository (harnesses, scripts, skill docs) is **MIT** — see
 [`LICENSE`](LICENSE). Bundled/referenced upstream tools keep their own licenses.

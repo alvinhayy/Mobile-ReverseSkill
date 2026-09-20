@@ -128,7 +128,7 @@ Skrip bypass (`rasp-bypass.js`, `rasp-neutralise.js`, `flutter-tls*.js`, `approo
 
 | Skill | Sumber | Untuk apa |
 |---|---|---|
-| **reverse-engineer** | gist `binsarjr/adbd5110cd78bbd09a1d9afc0f23c944` | Static analysis APK/IPA/web bundle → endpoints, secrets, permissions, flow, deception/honeypot. **Tersedia langsung** via tool Skill (`reverse-engineer`). Tools yang dirujuk: `apktool`, `jadx`, `dex2jar`, `strings`, `unzip`, Docker `cryptax/android-re`, `trufflehog`, `gitleaks`, `class-dump`, `otool`, `codesign`, `plutil`, `js-beautify`, `prettier`. |
+| **reverse-engineer** | in-repo `skills/reverse-engineer/` | Static analysis APK/IPA/web bundle → endpoints, secrets, permissions, flow, deception/honeypot. **Tersedia langsung** via tool Skill (`reverse-engineer`). Tools yang dirujuk: `apktool`, `jadx`, `dex2jar`, `strings`, `unzip`, Docker `cryptax/android-re`, `trufflehog`, `gitleaks`, `class-dump`, `otool`, `codesign`, `plutil`, `js-beautify`, `prettier`. |
 | **afl-fuzzing** (`aflpp`) | `https://mcpmarket.com/tools/skills/afl-fuzzing` (juga `.../afl-security-fuzzing`) | Metodologi AFL++ greybox fuzzing. Halaman di balik Vercel JS-challenge (tak bisa di-fetch otomatis) — metodologinya **sudah diimplementasikan** di `fuzzing/` (lihat §5). |
 
 **Install skill afl** (via [skillfish](https://www.npmjs.com/package/skillfish)):
