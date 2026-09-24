@@ -28,6 +28,29 @@
 | [`reverse-engineer`](skills/reverse-engineer/) | Static analysis of Android APKs, iOS IPAs, and web bundles — extract endpoints, secrets, permissions, code flow, and separate real endpoints from planted honeypots; report as JSON + Markdown. |
 | [`mobile-vuln-hunt`](skills/mobile-vuln-hunt/) | Vulnerability-class detection over decompiled trees — ripgrep signature scan (zero deps) + optional semgrep taint rules for the dataflow classes, then triage (exported check, attacker-APK discipline) and per-class dynamic PoCs, driven by the [Android](docs/vuln-classes-android.md) & [iOS](docs/vuln-classes-ios.md) vuln-class references. |
 
+## Workflow
+
+<p align="center">
+  <img src="assets/workflow-excalidraw.png"
+       alt="Excalidraw-style authorized analysis workflow for Mobile-ReverseSkill"
+       width="100%">
+</p>
+
+All dynamic testing stays on an isolated device or emulator, traffic is limited to an
+authorized/local backend, and fuzzing targets local libraries rather than production services.
+
+## Component connections
+
+<p align="center">
+  <img src="assets/component-connections-excalidraw.png"
+       alt="Excalidraw-style component connection diagram for Mobile-ReverseSkill"
+       width="100%">
+</p>
+
+The canonical files define behavior once; provider copies only adapt that behavior to each
+agent's native format. At runtime, the agent combines skills and commands with local scripts,
+Frida helpers, and optional MCP interfaces, then feeds evidence back into the next analysis pass.
+
 ## Provider support
 
 Skills, slash commands, and the agent guide ship in each tool's **native format** —
