@@ -8,8 +8,8 @@ Invoke the **reverse-engineer** skill and run a full static-analysis pass on: `$
 Steps:
 1. Load the `reverse-engineer` skill.
 2. Detect artifact type (APK/XAPK/AAB, IPA, or web/JS bundle) and run the matching pipeline:
-   manifest/Info.plist → decompile (`jadx`/`apktool`; note Flutter `libapp.so`) → strings/URL
-   carve → secrets (`trufflehog`/`gitleaks`) → certificate/pinning.
+   manifest/Info.plist → decompile (`jadx`/`apktool`; for Flutter run r2flutter + Blutter over
+   `libapp.so`) → strings/URL carve → secrets (`trufflehog`/`gitleaks`) → certificate/pinning.
 3. Do the **deception & honeypot** pass: trace runtime URL construction, decode obfuscation,
    classify each endpoint `CONFIRMED_REAL` vs `PLANTED_FAKE`.
 4. Emit `endpoints.json`, `secrets.json`, `metadata.json`, `flow-analysis.json`,

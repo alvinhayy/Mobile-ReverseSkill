@@ -11,7 +11,7 @@ Every tool that produces output writes to a folder named after it, suffix `_out`
 ```
 out/
   apktool_out/    jadx_out/    dex2jar_out/    baksmali_out/    dexdump_out/
-  strings_out/    apkleaks_out/    detect.txt    MANIFEST.txt
+  strings_out/    apkleaks_out/    r2flutter_out/    detect.txt    MANIFEST.txt
 ```
 
 `*_out/` holds **decompiled target code** — it is git-ignored and must never be committed.
@@ -57,23 +57,33 @@ usually in the **arm64 split** / `.xapk`, not the base APK.
 
 | Tool | Install (macOS) | Role | `_out` |
 |---|---|---|---|
+| **r2flutter** | radare2 6.2.2+; `git clone radareorg/r2flutter && make && make user-install` | Fast Dart AOT metadata, functions/addresses, classes/types, strings/xrefs, r2 annotations | `r2flutter_out/` |
 | **blutter** | `git clone worawit/blutter` + `brew install cmake ninja` | Dart AOT snapshot -> pseudo-source, class defs, `blutter_frida.js` | `blutter_out/` |
 | **reFlutter** | `pip install reflutter` | patch/repack APK for traffic interception + snapshot dump (dynamic) | `reflutter_out/` (manual) |
 | `unzip` | bundled | pull `assets/flutter_assets/` (pubspec, fonts) | `assets_out/` |
 
 Run:
 ```bash
-scripts/install-tools.sh --stack flutter --check     # audit (blutter, reflutter, cmake, ninja)
+scripts/install-tools.sh --stack flutter --check     # audit (r2flutter/r2, blutter, reflutter)
+export R2FLUTTER_HOME="$HOME/tools/r2flutter"        # source build + standalone binary
 export BLUTTER_HOME="$HOME/tools/blutter"            # where blutter.py lives
-scripts/analyze-flutter.sh app.xapk out/app          # -> out/app/blutter_out/, assets_out/
+scripts/analyze-flutter.sh app.xapk out/app          # -> r2flutter_out/, blutter_out/, assets_out/
 ```
 
 Notes:
+- Start with `r2flutter_out/header.json`; `version_source=exact-hash` has the strongest layout
+  confidence. Cross-check `structural-probe` and `fingerprint` results with Blutter. Do not enable
+  r2flutter's heuristic `-n` name pool by default.
+- `r2flutter_out/functions.json` maps recovered Dart names to native entrypoints;
+  `classes.json`, `types.json`, `strings.json`, `xrefs.json`, and `sbom.json` provide structured
+  metadata. r2flutter is not a Dart source decompiler.
 - `blutter_out/` contains `asm/` (per-library Dart pseudo-source), `objs.txt`, `pp.txt`, and
   `blutter_frida.js` (a ready hook script for the exact snapshot).
 - **First run builds blutter's Dart VM** for the target's snapshot version (needs `cmake`+`ninja`);
   subsequent runs on the same version are fast.
 - blutter works on **arm64** `libapp.so`; pass the arm64 split or the `.xapk`.
+- r2flutter primarily targets AArch64 and can annotate the binary directly inside radare2 with
+  `r2flutter -A` or the heavier `r2flutter -AAA` analysis pass.
 - reFlutter is the *dynamic* companion (repackage + resign + install) — run it manually.
 
 ## React Native (stage 3)
@@ -136,12 +146,19 @@ Notes:
 | **ideviceinstaller** | `brew install ideviceinstaller` | install/list/uninstall apps over USB |
 | **ios-deploy** | `brew install ios-deploy` | install + debug an app bundle |
 | **ipatool** | `brew install ipatool` | download IPAs from the App Store |
+| **ios-ipa-extractor** | `scripts/install-tools.sh --stack ios` | enumerate apps on a trusted USB iPhone/iPad with Frida, then download the matching encrypted IPA through `ipatool` |
 | **ios-app-signer** | GUI (github.com/DanTheMan827/ios-app-signer) | re-sign IPA; **uncheck "No get-task-allow"** for Frida attach |
 | **Sideloadly / AltStore** | sideloadly.io / altstore.io | sideload re-signed IPA with a free Apple cert (AltStore auto-refreshes) |
 | **frida-ios-dump** | pip / repo | decrypt an installed App Store binary (needs a JB device once) |
 | **ioscpy** | github.com/lautarovculic/ioscpy | scrcpy-for-iOS — mirror/control a **jailbroken** iPhone (the iOS analog to the Android uiautomator2 MCP) |
 
 See [`ios-nojailbreak.md`](ios-nojailbreak.md) for the full re-sign + sideload workflow.
+
+`ios-ipa-extractor` installs to `~/tools/ios-ipa-extractor` with an isolated virtualenv and a
+launcher at `~/.local/bin/ios-ipa-extractor`. The tool does not pull or decrypt the installed
+binary: it resolves the bundle ID from the device and downloads Apple's FairPlay-encrypted IPA.
+Do not pass passwords or 2FA codes with `-p`/`-c`; authenticate interactively with `ipatool` so
+secrets do not leak into shell history or agent logs.
 
 ## Cross disassemblers (any stack)
 

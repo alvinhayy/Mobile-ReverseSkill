@@ -12,13 +12,16 @@ third-party production. Fuzzing runs offline (local libs / emulator).
 ## Static analysis (`skills/reverse-engineer/`, `scripts/`)
 - `scripts/detect-stack.sh <apk|ipa|xapk>` → flutter | react-native | unity | xamarin | cordova | native
 - `scripts/analyze-android.sh` (jadx/apktool/baksmali/dex2jar/dexdump/strings/apkleaks) → `<tool>_out/`
-- `scripts/analyze-flutter.sh` (blutter, reFlutter) · `scripts/analyze-rn.sh` (Hermes/JSC) · `scripts/analyze-ios.sh`
+- `scripts/analyze-flutter.sh` (r2flutter metadata/radare2, blutter, reFlutter) · `scripts/analyze-rn.sh` (Hermes/JSC) · `scripts/analyze-ios.sh`
 - `scripts/attack-surface.sh <apk>` → exported components, deep links, providers, risky flags (+ `am start` line)
 - `scripts/install-tools.sh --stack <android|flutter|rn|ios|cross> --check`
 - Vuln-class hunt after static: **`mobile-vuln-hunt`** skill — rg signatures (+ optional semgrep
   taint) over `jadx_out/`/`classdump_out/`, per-class PoCs in `docs/vuln-classes-{android,ios}.md`
 
-## APK handling (`scripts/`)
+## App acquisition & APK handling (`scripts/`)
+- `/pull-apps <package|bundle-id>` — Android: pull base APK + splits over adb; iOS: use
+  `ios-ipa-extractor` + `ipatool` to resolve an installed app on a trusted USB device and download
+  its still-FairPlay-encrypted App Store IPA (never pass Apple ID passwords/2FA on the CLI)
 - `scripts/merge-apks.sh <dir|xapk|apks|apkm>` → one signed APK (APKEditor) — do this before patching split apps
 - `scripts/patch-apk.sh decompile|build|sign|depin|find-root|install` → static patch & re-sign (Frida-independent)
 

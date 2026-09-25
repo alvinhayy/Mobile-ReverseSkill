@@ -3,10 +3,20 @@
 Authorized targets only. Detect with `scripts/detect-stack.sh` (`libflutter.so` + `libapp.so`).
 
 ## Static
-`scripts/analyze-flutter.sh <apk|xapk> out/` → **blutter** decompiles the Dart AOT snapshot
-(`libapp.so`) into `blutter_out/` (pseudo-source, class/function names, `blutter_frida.js` for the
-exact snapshot). blutter matches the target's Dart runtime version. `reFlutter` is the repackage
-companion. Needs the **arm64** `libapp.so` (pass the arm64 split / .xapk).
+`scripts/analyze-flutter.sh <apk|xapk> out/` runs two complementary static passes over the Dart
+AOT snapshot (`libapp.so`):
+
+- **r2flutter** → `r2flutter_out/` with snapshot/layout information, recovered functions and
+  native addresses, classes/types, reliable ObjectPool strings, xrefs, and a best-effort SBOM.
+  Read `header.json` first and lower confidence when `version_source` is `structural-probe` or
+  `fingerprint`. It requires radare2 6.2.2+ and primarily targets AArch64.
+- **Blutter** → `blutter_out/` with pseudo-source, class/function names, object-pool dumps, and
+  `blutter_frida.js` for the exact snapshot.
+
+Correlate both outputs rather than treating either as recovered source. `reFlutter` is the
+repackage companion. The pipeline needs the **arm64** `libapp.so` (pass the arm64 split / XAPK).
+Detailed r2flutter usage and confidence rules live in
+[`../skills/reverse-engineer/references/r2flutter.md`](../skills/reverse-engineer/references/r2flutter.md).
 
 ## TLS interception (three tiers)
 Flutter uses its own BoringSSL and **ignores the system proxy**, so browser-style proxying fails.

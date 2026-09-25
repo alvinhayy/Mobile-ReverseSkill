@@ -5,7 +5,12 @@ Authorized targets only.
 
 ## IPA acquisition & decryption
 ```bash
-# App Store
+# Non-jailbroken device: enumerate the installed app, then download its Apple CDN IPA.
+# Install once with: scripts/install-tools.sh --stack ios
+ios-ipa-extractor
+ios-ipa-extractor -b com.target.app -o targets/com.target.app/app.ipa
+
+# App Store manually
 ipatool search "Target App"
 ipatool purchase -b com.target.app
 ipatool download -b com.target.app -o app.ipa
@@ -18,6 +23,12 @@ python3 dump.py com.target.app -o decrypted.ipa     # frida-ios-dump (recommende
 Clutch -i ; Clutch -d 1                              # Clutch
 DYLD_INSERT_LIBRARIES=dumpdecrypted.dylib /path/to/App   # dumpdecrypted
 ```
+
+The `ios-ipa-extractor` path uses Frida only to enumerate apps and determine the bundle ID;
+`ipatool` then downloads the authentic package from Apple. The executable is still
+FairPlay-encrypted, so verify `cryptid` and decrypt an authorized target before meaningful
+class-dump or disassembly. Authenticate interactively—never pass Apple ID passwords or 2FA codes
+on the command line.
 
 ## Mach-O analysis
 ```bash

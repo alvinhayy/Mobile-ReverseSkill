@@ -1,10 +1,11 @@
 ---
 name: reverse-engineer
 description: Perform static analysis on Android APK, iOS IPA, or bundled web apps to extract endpoints, secrets, permissions, code flow, and other security-relevant data
-category: mobile-security
-author: alvinhayy
 license: MIT
-tags: [android, ios, apk, ipa, static-analysis, secrets, endpoints, reverse-engineering]
+metadata:
+  category: mobile-security
+  author: alvinhayy
+  tags: [android, ios, apk, ipa, static-analysis, secrets, endpoints, reverse-engineering]
 ---
 
 # Reverse Engineering Static Analysis: #$ARGUMENTS
@@ -67,6 +68,7 @@ You need reverse engineering tools. Follow this decision process **in order**:
 Check for locally installed tools first using `which` or `command -v`:
 
 **APK tools**: `apktool`, `jadx`, `dex2jar`, `baksmali`, `strings`, `grep`, `find`, `unzip`
+**Flutter AOT tools**: `r2flutter` + radare2 6.2.2 or newer, `blutter`, `reflutter`
 **IPA tools**: `plutil` (macOS native), `plistutil`, `class-dump`, `dsdump`, `otool` (macOS native), `jtool2`, `codesign` (macOS native), `strings`, `unzip`
 **Web tools**: `node`, `npx`, `js-beautify`, `prettier`
 **Secret scanning**: `trufflehog`, `gitleaks`
@@ -261,16 +263,34 @@ Run these independently and in parallel:
 
 Flutter apps compile Dart ahead-of-time into a native ELF snapshot, `libapp.so` (paired with
 `libflutter.so`). `classes.dex` holds only the thin plugin/shell — app logic, endpoints, and
-keys are **invisible to `jadx`**. Whenever `lib/<abi>/libapp.so` exists, run the
-[blutter](https://github.com/worawit/blutter) pass below. This is a mandatory pipeline stage
-for Flutter targets, not an optional extra.
+keys are **invisible to `jadx`**. Whenever `lib/<abi>/libapp.so` exists, run both the
+[r2flutter](https://github.com/radareorg/r2flutter) metadata pass and the
+[blutter](https://github.com/worawit/blutter) pseudo-source pass when compatible. They are
+complementary: r2flutter recovers snapshot metadata, native entrypoints, classes/types, strings,
+and radare2 annotations; Blutter provides broader pseudo-source and a snapshot-specific Frida
+helper. If either tool cannot parse the snapshot, continue with the other and document the gap.
 
 1. **Detect** — unzip the APK/XAPK and look for `libapp.so` + `libflutter.so` under `lib/`.
    Always analyze the **arm64** (`arm64-v8a`) lib — pass the `.xapk`, the merged APK, or the
    `split_config.arm64_v8a.apk` (blutter needs both `libapp.so` and `libflutter.so`; the
    version of `libflutter.so` selects the Dart runtime to build against).
 
-2. **Install blutter** (one-time; needs Python 3, `cmake`, `ninja`, and a C++20 toolchain —
+2. **Run r2flutter metadata analysis** — read
+   [`references/r2flutter.md`](references/r2flutter.md) before using it. Verify the r2/r2flutter
+   versions, inspect `header.json` and its `version_source`, then emit JSON into
+   `r2flutter_out/`:
+   ```bash
+   r2flutter -jH lib/arm64-v8a/libapp.so > r2flutter_out/header.json
+   r2flutter -jf lib/arm64-v8a/libapp.so > r2flutter_out/functions.json
+   r2flutter -jc lib/arm64-v8a/libapp.so > r2flutter_out/classes.json
+   r2flutter -jz lib/arm64-v8a/libapp.so > r2flutter_out/strings.json
+   r2flutter -jx lib/arm64-v8a/libapp.so > r2flutter_out/xrefs.json
+   ```
+   Do not use `-n` by default, and do not force `-D` unless the Dart version is independently
+   known. Treat `structural-probe` and especially `fingerprint` layouts as lower-confidence and
+   cross-check them with Blutter.
+
+3. **Install blutter** (one-time; needs Python 3, `cmake`, `ninja`, and a C++20 toolchain —
    on first run it downloads and builds the Dart SDK matching the target's snapshot, which
    takes a while but is cached for later runs on the same Dart version):
    ```bash
@@ -279,7 +299,7 @@ for Flutter targets, not an optional extra.
    export BLUTTER_HOME="$PWD/blutter"        # this repo's analyze-flutter.sh expects it
    ```
 
-3. **Run** — it auto-detects the Dart/Flutter version from the snapshot and writes everything
+4. **Run Blutter** — it auto-detects the Dart/Flutter version from the snapshot and writes everything
    to the output dir:
    ```bash
    python3 blutter.py app.xapk out/blutter          # XAPK / merged APK
@@ -287,7 +307,12 @@ for Flutter targets, not an optional extra.
    python3 blutter.py lib/arm64-v8a/libapp.so out/blutter      # or the .so itself
    ```
 
-4. **Read the output** (`out/blutter/`):
+5. **Read and correlate the output**:
+   - `r2flutter_out/header.json` — detected snapshot hash/layout and confidence source.
+   - `r2flutter_out/functions.json` — recovered Dart names mapped to native entrypoints; use these
+     addresses to seed radare2 or later Frida work.
+   - `r2flutter_out/classes.json`, `types.json`, `strings.json`, `xrefs.json`, `sbom.json` —
+     structured metadata for code-flow, endpoint, type, and component analysis.
    - `asm/` — per-Dart-library pseudo-source: class/function names recovered from the AOT
      snapshot, string literals, and call structure. This is the primary reading material.
    - `objs.txt` / `pp.txt` — Dart object pool dump; **URLs, API paths, hard-coded keys and
@@ -295,13 +320,14 @@ for Flutter targets, not an optional extra.
    - `blutter_frida.js` — a ready-made Frida hook script generated for the *exact* snapshot
      version; attach it during the dynamic phase instead of writing hooks from scratch.
 
-5. **Feed the other analyses** — treat blutter output as the decompiled source for Flutter
-   targets: run Endpoint Extraction, Secrets Detection, and Deception & Honeypot analysis over
-   `asm/` + `pp.txt` exactly as the APK pipeline does over `jadx_out/`. Dart code builds URLs
-   at runtime (`'https://' + host + path`) just like Java — trace construction before
-   classifying an endpoint as real.
+6. **Feed the other analyses** — treat Blutter output as pseudo-source and r2flutter output as
+   recovered AOT metadata, not source code. Run Endpoint Extraction, Secrets Detection, and
+   Deception & Honeypot analysis over `blutter_out/asm/`, `objs.txt`, `pp.txt`, and
+   `r2flutter_out/*.json`. A string in either tool is not evidence of a live endpoint by itself;
+   require an xref or traced construction/use before classification. Dart code builds URLs at
+   runtime (`'https://' + host + path`) just like Java.
 
-6. **Dynamic companion** — `reFlutter` (`pip install reflutter`) repackages the APK with a
+7. **Dynamic companion** — `reFlutter` (`pip install reflutter`) repackages the APK with a
    patched `libflutter.so` for traffic interception (Flutter's BoringSSL ignores the system
    proxy and system CAs). Pair with the Frida TLS scripts in `runtime/` of this repo.
 
@@ -1120,7 +1146,8 @@ scripts/detect-stack.sh app.apk        # flutter | react-native | unity | xamari
 ### Output convention — `<tool>_out/`
 Every tool that emits output writes to a folder named after it, suffix `_out`
 (`jadx_out/`, `apktool_out/`, `dex2jar_out/`, `baksmali_out/`, `dexdump_out/`,
-`strings_out/`, `apkleaks_out/`). These hold **decompiled target code** — keep `*_out/` in
+`strings_out/`, `apkleaks_out/`, `r2flutter_out/`). These hold **decompiled/recovered target
+data** — keep `*_out/` in
 `.gitignore`; never commit them.
 
 ### Android (stage 1)
@@ -1133,14 +1160,16 @@ Read `jadx_out/` (Java), `apktool_out/AndroidManifest.xml`, `strings_out/urls.tx
 
 ### Flutter (stage 2)
 Dart AOT logic lives in `libapp.so` (+ `libflutter.so`), usually in the **arm64 split / .xapk**.
-Manual blutter steps: see the **Flutter Pipeline** section in Step 3 above.
+Manual r2flutter + Blutter steps: see the **Flutter Pipeline** section in Step 3 above and
+[`references/r2flutter.md`](references/r2flutter.md).
 ```bash
 export BLUTTER_HOME="$HOME/tools/blutter"
-scripts/analyze-flutter.sh app.xapk out/app    # blutter -> out/app/blutter_out/ ; assets_out/
+scripts/analyze-flutter.sh app.xapk out/app    # r2flutter_out/ + blutter_out/ + assets_out/
 ```
-Read `blutter_out/asm/` (Dart pseudo-source), `objs.txt`/`pp.txt`, and use the generated
-`blutter_out/blutter_frida.js` to hook the exact snapshot. First run builds blutter's Dart VM
-for the target snapshot version (`cmake`+`ninja`). `reFlutter` is the dynamic companion
+Read `r2flutter_out/header.json` first, then correlate `functions.json`, `classes.json`,
+`strings.json`, and `xrefs.json` with `blutter_out/asm/`, `objs.txt`, and `pp.txt`. Use the
+generated `blutter_out/blutter_frida.js` to hook the exact snapshot. First Blutter run builds its
+Dart VM for the target snapshot version (`cmake`+`ninja`). `reFlutter` is the dynamic companion
 (repackage for interception).
 
 ### React Native (stage 3)
